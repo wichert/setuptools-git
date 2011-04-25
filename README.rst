@@ -1,9 +1,9 @@
 About
 -----
 
-This is a plugin for setuptools that enables git integration.  Once
+This is a plugin for setuptools that enables git integration. Once
 installed, Setuptools can be told to include in a package distribution
-all the files tracked by git.  This is an alternative to explicit
+all the files tracked by git. This is an alternative to explicit
 inclusion specifications with ``MANIFEST.in``.
 
 A package distribution here refers to a package that you create using
@@ -13,7 +13,7 @@ setup.py, ex::
   python setup.py bdist_rpm
   python setup.py bdist_egg
 
-This package was formerly known as gitlsfiles.  The name change is the
+This package was formerly known as gitlsfiles. The name change is the
 result of an effort by the setuptools plugin developers to provide a
 uniform naming convention.
 
@@ -39,7 +39,7 @@ Usage
 -----
 
 To activate this plugin, you must first package your python module
-with ``setup.py`` and use setuptools.  The former is well documented in
+with ``setup.py`` and use setuptools. The former is well documented in
 the `distutils manual <http://docs.python.org/dist/dist.html>`_.
 
 To use setuptools instead of distutils, just edit ``setup.py`` and
@@ -65,7 +65,7 @@ to your invocation of `setup()`::
      ...)
 
 which will detect that a directory is a package if it contains a
-``__init__.py`` file.  Alternatively, you can do without ``__init__.py``
+``__init__.py`` file. Alternatively, you can do without ``__init__.py``
 files and tell Setuptools explicitly which packages to process::
 
    setup(...,
@@ -90,7 +90,7 @@ In this example, we prevent setuptools from packaging `.gitignore` and
 the Gimp and Blender source files found under the `images` directory.
 
 Files to exclude from the package can also be listed in the `setup()`
-directive.  To do the same as the MANIFEST.in above, do::
+directive. To do the same as the MANIFEST.in above, do::
 
    setup(...,
        exclude_package_data = {'': ['.gitignore'], 
@@ -109,10 +109,10 @@ Gotchas
 -------
 
 Be aware that for this module to work properly, git and the git
-meta-data must be available.  That means that if someone tries to make
+meta-data must be available. That means that if someone tries to make
 a package distribution out of a non-git distribution of yours, say a
 tarball, setuptools will lack the information necessary to know which
-files to include.  A similar problem will happen if someone clones
+files to include. A similar problem will happen if someone clones
 your git repository but does not install this plugin.
 
 Resolving those problems is out of the scope of this plugin; you
@@ -136,5 +136,4 @@ References
 * `Setuptools complete manual
   <http://peak.telecommunity.com/DevCenter/setuptools>`_
 
-Thanks to Zooko O'Whielacronx for many improvements to this
-README.txt.
+Thanks to Zooko O'Whielacronx for many improvements to the documentation.
