@@ -1,8 +1,6 @@
-*~
 *.pyc
 *.pyo
-dist
-build
-ez_setup.py
-setuptools-*.egg
-*.egg-info
+/dist
+/build
+/ez_setup.py
+/*.egg-info
