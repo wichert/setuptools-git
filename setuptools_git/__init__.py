@@ -29,6 +29,15 @@ except ImportError:
         return output
 
 
+def list_git_files(cwd):
+    git_top = check_output(['git', 'rev-parse', '--show-toplevel'],
+            stderr=PIPE, cwd=cwd).strip()
+    git_files = check_output(['git', 'ls-files'], cwd=git_top, stderr=PIPE)
+    git_files = set([os.path.join(git_top, fn)
+        for fn in git_files.splitlines()])
+    return git_files
+
+
 def gitlsfiles(dirname=''):
     try:
         if dirname:
@@ -37,11 +46,7 @@ def gitlsfiles(dirname=''):
             cwd = None
             dirname = '.'
         dirname = os.path.realpath(dirname)
-        git_top = check_output(['git', 'rev-parse', '--show-toplevel'],
-                stderr=PIPE, cwd=cwd).strip()
-        git_files = check_output(['git', 'ls-files'], cwd=git_top, stderr=PIPE)
-        git_files = set([os.path.join(git_top, fn)
-            for fn in git_files.splitlines()])
+        git_files = list_git_files(cwd)
     except (CalledProcessError, OSError):
         # Something went terribly wrong but the setuptools doc says we
         # must be strong in the face of danger.  We shall not run away

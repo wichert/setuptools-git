@@ -25,6 +25,7 @@ setup(
     description="Setuptools revision control system plugin for Git",
     long_description=open('README.rst').read(),
     license="Public Domain",
+    test_suite='setuptools_git',
     classifiers=[
         "Topic :: Software Development :: Version Control",
         "Development Status :: 4 - Beta",
