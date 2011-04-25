@@ -1,6 +1,33 @@
 import unittest
 
 
+class is_child_tests(unittest.TestCase):
+    def is_child(self, *a, **kw):
+        from setuptools_git import is_child
+        return is_child(*a, **kw)
+
+    def test_same_directory(self):
+        self.assertEqual(self.is_child('one', 'one'), False)
+
+    def test_subdir(self):
+        import os
+        self.assertEqual(
+                self.is_child('foo', os.path.join('foo', 'bar')),
+                True)
+
+    def test_parent(self):
+        import os
+        self.assertEqual(
+                self.is_child(os.path.join('foo', 'bar'), 'foo'),
+                False)
+
+    def test_prefix(self):
+        import os
+        self.assertEqual(
+                self.is_child('foo', os.path.join('foo1', 'bar')),
+                False)
+
+
 class GitTestCase(unittest.TestCase):
     def setUp(self):
         import os
@@ -18,13 +45,13 @@ class GitTestCase(unittest.TestCase):
         os.chdir(self.old_cwd)
 
     def create_file(self, *path):
-        import os.path
+        import os
         fd = open(os.path.join(*path), 'wt')
         print >>fd, 'dummy'
         fd.close()
 
     def create_git_file(self, *path):
-        import os.path
+        import os
         from setuptools_git.compat import check_call
         filename = os.path.join(*path)
         fd = open(filename, 'wt')
@@ -32,6 +59,13 @@ class GitTestCase(unittest.TestCase):
         fd.close()
         check_call(['git', 'add', filename])
         check_call(['git', 'commit', '--quiet', '-m', 'add new file'])
+
+    def create_git_symlink(self, source, target):
+        import os
+        from setuptools_git.compat import check_call
+        os.symlink(source, target)
+        check_call(['git', 'add', target])
+        check_call(['git', 'commit', '--quiet', '-m', 'add new symlink'])
 
 
 class list_git_files_tests(GitTestCase):
@@ -85,16 +119,26 @@ class gitlsfiles_tests(GitTestCase):
                 set(self.gitlsfiles(os.path.join(self.directory, 'package'))),
                 set(['root.txt']))
 
-    def test_directory_symlink(self):
+    def test_directory_outside_package_symlinked(self):
         import os
         os.mkdir(os.path.join(self.directory, 'subdir'))
         self.create_git_file('subdir', 'entry.txt')
         os.mkdir(os.path.join(self.directory, 'package'))
         self.create_git_file('package', 'root.txt')
-        os.symlink(
-                os.path.join(self.directory, 'subdir'),
-                os.path.join(self.directory, 'package', 'data'))
+        self.create_git_symlink(
+                os.path.join('..', 'subdir'),
+                os.path.join('package', 'data'))
         self.assertEqual(
                 set(self.gitlsfiles(os.path.join(self.directory, 'package'))),
                 set(['root.txt',
                     os.path.join('data', 'entry.txt')]))
+
+    def test_no_symlink_duplicates(self):
+        import os
+        os.mkdir(os.path.join(self.directory, 'subdir1'))
+        self.create_git_file('subdir1', 'entry.txt')
+        self.create_git_symlink('subdir1', 'subdir2')
+        self.assertEqual(
+                set(self.gitlsfiles(self.directory)),
+                set([os.path.join('subdir1', 'entry.txt'),
+                     'subdir2']))
