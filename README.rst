@@ -57,9 +57,7 @@ those files are.
 
 When Setuptools builds a binary package, you can ask it to include all
 files tracked by your revision control system, by adding these argument
-to your invocation of `setup()`:
-
-.. code-block:: python
+to your invocation of `setup()`::
 
    setup(...,
      packages=find_packages(),
@@ -68,9 +66,7 @@ to your invocation of `setup()`:
 
 which will detect that a directory is a package if it contains a
 ``__init__.py`` file.  Alternatively, you can do without ``__init__.py``
-files and tell Setuptools explicitly which packages to process:
-
-.. code-block:: python
+files and tell Setuptools explicitly which packages to process::
 
    setup(...,
      packages=["a_package", "another_one"],
@@ -94,18 +90,14 @@ In this example, we prevent setuptools from packaging `.gitignore` and
 the Gimp and Blender source files found under the `images` directory.
 
 Files to exclude from the package can also be listed in the `setup()`
-directive.  To do the same as the MANIFEST.in above, do:
-
-.. code-block:: python
+directive.  To do the same as the MANIFEST.in above, do::
 
    setup(...,
        exclude_package_data = {'': ['.gitignore'], 
                          'images': ['\*.xcf', '\*.blend']},
        ...)
 
-Here is another example:
-
-.. code-block:: python
+Here is another example::
 
    setup(...,
      exclude_package_data = {'': ['.gitignore', 'artwork/\*'],
@@ -129,9 +121,7 @@ are a concern to you.
 
 You can make sure that anyone who clones your git repository and uses
 your setup.py file has this plugin by adding a `setup_requires`
-argument:
-
-.. code-block:: python
+argument::
 
    setup(...,
      setup_requires = [ "setuptools_git >= 0.3", ],
