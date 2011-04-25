@@ -57,13 +57,3 @@ def gitlsfiles(dirname=''):
             if realname in git_files:
                 yield filename[prefix_length:]
 
-
-if __name__ == "__main__":
-    import sys
-    from pprint import pprint
-
-    if len(sys.argv) != 2:
-        print("USAGE: %s DIRNAME" % sys.argv[0])
-        sys.exit(1)
-
-    pprint(list(gitlsfiles(sys.argv[1])))
