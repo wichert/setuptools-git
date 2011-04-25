@@ -94,13 +94,13 @@ directive.  To do the same as the MANIFEST.in above, do::
 
    setup(...,
        exclude_package_data = {'': ['.gitignore'], 
-                         'images': ['\*.xcf', '\*.blend']},
+                         'images': ['*.xcf', '*.blend']},
        ...)
 
 Here is another example::
 
    setup(...,
-     exclude_package_data = {'': ['.gitignore', 'artwork/\*'],
+     exclude_package_data = {'': ['.gitignore', 'artwork/*'],
                              'model': ['config.py']},
       ...)
 
