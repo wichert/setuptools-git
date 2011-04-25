@@ -1,25 +1,11 @@
 import unittest
 
-try:
-    from subprocess import check_call
-except ImportError:
-    # BBB for python <2.5
-    def check_call(*popenargs, **kwargs):
-        from subprocess import call
-        from subprocess import CalledProcessError
-        retcode = call(*popenargs, **kwargs)
-        cmd = kwargs.get("args")
-        if cmd is None:
-            cmd = popenargs[0]
-        if retcode:
-            raise CalledProcessError(retcode, cmd)
-        return retcode
-
 
 class GitTestCase(unittest.TestCase):
     def setUp(self):
         import os
         import tempfile
+        from setuptools_git.compat import check_call
         self.directory = tempfile.mkdtemp()
         self.old_cwd = os.getcwd()
         os.chdir(self.directory)
@@ -39,6 +25,7 @@ class GitTestCase(unittest.TestCase):
 
     def create_git_file(self, *path):
         import os.path
+        from setuptools_git.compat import check_call
         filename = os.path.join(*path)
         fd = open(filename, 'wt')
         print >>fd, 'dummy'
