@@ -56,4 +56,3 @@ def gitlsfiles(dirname=''):
             realname = os.path.realpath(filename)
             if realname in git_files:
                 yield filename[prefix_length:]
-

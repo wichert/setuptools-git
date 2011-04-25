@@ -38,7 +38,7 @@ setup(
         "Programming Language :: Python :: 3",
         ],
     entry_points="""
-	[setuptools.file_finders]
-	git=setuptools_git:gitlsfiles
-	"""
+        [setuptools.file_finders]
+        git=setuptools_git:gitlsfiles
+        """
 )
