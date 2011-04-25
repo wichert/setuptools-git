@@ -1,17 +1,13 @@
-
-Setuptools_git Manual
-=====================
-
 About
 -----
 
 This is a plugin for setuptools that enables git integration.  Once
 installed, Setuptools can be told to include in a package distribution
 all the files tracked by git.  This is an alternative to explicit
-inclusion specifications with `MANIFEST.in`.
+inclusion specifications with ``MANIFEST.in``.
 
 A package distribution here refers to a package that you create using
-setup.py, ex:
+setup.py, ex::
 
   python setup.py sdist
   python setup.py bdist_rpm
@@ -25,11 +21,11 @@ uniform naming convention.
 Installation
 ------------
 
-With easy_install:
+With easy_install::
 
   easy_install setuptools_git
 
-Alternative manual installation:
+Alternative manual installation::
 
   tar -zxvf setuptools_git-X.Y.Z.tar.gz
   cd setuptools_git-X.Y.Z
@@ -43,17 +39,15 @@ Usage
 -----
 
 To activate this plugin, you must first package your python module
-with `setup.py` and use setuptools.  The former is well documented in
-the distutils manual:
+with ``setup.py`` and use setuptools.  The former is well documented in
+the `distutils manual <http://docs.python.org/dist/dist.html>`_.
 
-  http://docs.python.org/dist/dist.html
-
-To use setuptools instead of distutils, just edit `setup.py` and
-change
+To use setuptools instead of distutils, just edit ``setup.py`` and
+change::
 
   from distutils.core import setup
 
-to
+to::
   
   from setuptools import setup, find_packages
 
@@ -65,19 +59,23 @@ When Setuptools builds a binary package, you can ask it to include all
 files tracked by your revision control system, by adding these argument
 to your invocation of `setup()`:
 
-  setup(...,
-    packages=find_packages(),
-    include_package_data=True, 
-    ...)
+.. code-block:: python
+
+   setup(...,
+     packages=find_packages(),
+     include_package_data=True, 
+     ...)
 
 which will detect that a directory is a package if it contains a
-`__init__.py` file.  Alternatively, you can do without `__init__.py`
+``__init__.py`` file.  Alternatively, you can do without ``__init__.py``
 files and tell Setuptools explicitly which packages to process:
 
-  setup(...,
-    packages=["a_package", "another_one"],
-    include_package_data=True, 
-    ...)
+.. code-block:: python
+
+   setup(...,
+     packages=["a_package", "another_one"],
+     include_package_data=True, 
+     ...)
 
 This plugin lets setuptools know what files are tracked by your git
 revision control tool.  Setuptools ships with support for cvs and
@@ -87,7 +85,7 @@ monotone, mercurial, and many others.
 It might happen that you track files with your revision control system
 that you don't want to include in your packages.  In that case, you
 can prevent setuptools from packaging those files with a directive in
-your `MANIFEST.in`, ex:
+your `MANIFEST.in`, ex::
 
   exclude .gitignore
   recursive-exclude images *.xcf *.blend
@@ -98,17 +96,21 @@ the Gimp and Blender source files found under the `images` directory.
 Files to exclude from the package can also be listed in the `setup()`
 directive.  To do the same as the MANIFEST.in above, do:
 
-  setup(...,
-    exclude_package_data = {'': ['.gitignore'], 
-    			    'images': ['*.xcf', '*.blend']},
-    ...)
+.. code-block:: python
+
+   setup(...,
+       exclude_package_data = {'': ['.gitignore'], 
+                         'images': ['\*.xcf', '\*.blend']},
+       ...)
 
 Here is another example:
 
-  setup(...,
-    exclude_package_data = {'': ['.gitignore', 'artwork/*'],
-                            'model': ['config.py']},
-    ...)
+.. code-block:: python
+
+   setup(...,
+     exclude_package_data = {'': ['.gitignore', 'artwork/\*'],
+                             'model': ['config.py']},
+      ...)
 
 
 Gotchas
@@ -129,23 +131,20 @@ You can make sure that anyone who clones your git repository and uses
 your setup.py file has this plugin by adding a `setup_requires`
 argument:
 
-  setup(...,
-    setup_requires = [ "setuptools_git >= 0.3", ],
-    ...)
+.. code-block:: python
+
+   setup(...,
+     setup_requires = [ "setuptools_git >= 0.3", ],
+     ...)
     
 
 References
 ----------
 
-How to distribute Python modules with Distutils:
-  
-  http://docs.python.org/dist/dist.html
-
-
-Setuptools complete manual:
-
-  http://peak.telecommunity.com/DevCenter/setuptools
-
+* `How to distribute Python modules with Distutils
+  <http://docs.python.org/dist/dist.html>`_
+* `Setuptools complete manual
+  <http://peak.telecommunity.com/DevCenter/setuptools>`_
 
 Thanks to Zooko O'Whielacronx for many improvements to this
 README.txt.

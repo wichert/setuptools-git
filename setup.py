@@ -33,7 +33,7 @@ setup(
     author_email="ygingras@ygingras.net",
     url="",
     description="Setuptools revision control system plugin for Git",
-    long_description=long_desc,
+    long_description=open('README.rst').read(),
     license="Public Domain",
     classifiers=[
         "Topic :: Software Development :: Version Control",
