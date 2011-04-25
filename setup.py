@@ -13,7 +13,7 @@ except ImportError:
     from setuptools import setup
 
 
-version = '0.4.1'
+version = '1.0b1dev'
 
 setup(
     name="setuptools-git",
@@ -24,7 +24,7 @@ setup(
     keywords='distutils setuptools git',
     description="Setuptools revision control system plugin for Git",
     long_description=open('README.rst').read(),
-    license="Public Domain",
+    license='BSD',
     test_suite='setuptools_git',
     classifiers=[
         "Topic :: Software Development :: Version Control",
