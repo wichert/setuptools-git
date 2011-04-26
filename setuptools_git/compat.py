@@ -32,7 +32,7 @@ except ImportError:
             cmd = kwargs.get("args")
             if cmd is None:
                 cmd = popenargs[0]
-            raise CalledProcessError(retcode, cmd, output=output)
+            raise CalledProcessError(retcode, cmd)
         return output
 
 __all__ = ['check_call', 'check_output']
