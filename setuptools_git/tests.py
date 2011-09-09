@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import unittest
 
 
@@ -57,6 +58,12 @@ class list_git_files_tests(GitTestCase):
                 set([os.path.realpath('root.txt'),
                      os.path.realpath(os.path.join('subdir', 'entry.txt'))]))
 
+    def test_nonascii_filename(self):
+        import os.path
+        self.create_git_file('héhé.html')
+        result = self.list_git_files(self.directory)
+        self.assertEqual(result,
+                         set([os.path.realpath('héhé.html')]))
 
 class gitlsfiles_tests(GitTestCase):
     def gitlsfiles(self, *a, **kw):
