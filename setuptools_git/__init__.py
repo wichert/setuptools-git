@@ -12,11 +12,27 @@ from setuptools_git.compat import check_output
 
 
 def list_git_files(cwd):
+    # NB: passing the "-z" option to "git ls-files" below returns the
+    # output as a blob of null-terminated filenames without
+    # canonicalization or use of "-quoting.
+    #
+    # So we'll get back e.g.:
+    #
+    #'pyramid/tests/fixtures/static/h\xc3\xa9h\xc3\xa9.html'
+    #
+    # instead of:
+    #
+    #'"pyramid/tests/fixtures/static/h\\303\\251h\\303\\251.html"'
+    #
+    # for each file
+    #
+    # This is necessary for the matching done in the "if realname in
+    # git_files" code in gitlsfiles to work properly.
     git_top = check_output(['git', 'rev-parse', '--show-toplevel'],
             stderr=PIPE, cwd=cwd).strip()
-    git_files = check_output(['git', 'ls-files'], cwd=git_top, stderr=PIPE)
-    git_files = set([os.path.join(git_top, fn)
-        for fn in git_files.splitlines()])
+    ls = check_output(['git', 'ls-files', '-z'], cwd=git_top, stderr=PIPE)
+    filenames = filter(None, ls.split('\x00')) # filter None for trailing \x00
+    git_files = set([os.path.join(git_top, fn) for fn in filenames ])
     return git_files
 
 
