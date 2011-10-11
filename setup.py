@@ -23,7 +23,7 @@ setup(
     version=version,
     author="Yannick Gingras",
     author_email="ygingras@ygingras.net",
-    url="",
+    url="https://github.com/ygingras/setuptools-git",
     description="Setuptools revision control system plugin for Git",
     long_description=long_desc,
     license="Public Domain",
