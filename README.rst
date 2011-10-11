@@ -1,14 +1,10 @@
-
-Setuptools_git Manual
-=====================
-
 About
 -----
 
-This is a plugin for setuptools that enables git integration.  Once
+This is a plugin for setuptools that enables git integration. Once
 installed, Setuptools can be told to include in a package distribution
-all the files tracked by git.  This is an alternative to explicit
-inclusion specifications with `MANIFEST.in`.
+all the files tracked by git. This is an alternative to explicit
+inclusion specifications with ``MANIFEST.in``.
 
 A package distribution here refers to a package that you create using
 setup.py, for example::
@@ -17,7 +13,7 @@ setup.py, for example::
   $> python setup.py bdist_rpm
   $> python setup.py bdist_egg
 
-This package was formerly known as gitlsfiles.  The name change is the
+This package was formerly known as gitlsfiles. The name change is the
 result of an effort by the setuptools plugin developers to provide a
 uniform naming convention.
 
@@ -43,10 +39,10 @@ Usage
 -----
 
 To activate this plugin, you must first package your python module
-with `setup.py` and use setuptools.  The former is well documented in
+with ``setup.py`` and use setuptools. The former is well documented in
 the `distutils manual <http://docs.python.org/dist/dist.html>`_.
 
-To use setuptools instead of distutils, just edit `setup.py` and
+To use setuptools instead of distutils, just edit ``setup.py`` and
 change::
 
   from distutils.core import setup
@@ -61,7 +57,7 @@ those files are.
 
 When Setuptools builds a binary package, you can ask it to include all
 files tracked by your revision control system, by adding these argument
-to your invocation of ``setup()``::
+to your invocation of `setup()`::
 
   setup(...,
         packages=find_packages(),
@@ -113,10 +109,10 @@ Gotchas
 -------
 
 Be aware that for this module to work properly, git and the git
-meta-data must be available.  That means that if someone tries to make
+meta-data must be available. That means that if someone tries to make
 a package distribution out of a non-git distribution of yours, say a
 tarball, setuptools will lack the information necessary to know which
-files to include.  A similar problem will happen if someone clones
+files to include. A similar problem will happen if someone clones
 your git repository but does not install this plugin.
 
 Resolving those problems is out of the scope of this plugin; you
@@ -135,11 +131,10 @@ argument::
 References
 ----------
 
-- `How to distribute Python modules with Distutils
-  <http://docs.python.org/dist/dist.html>`_.
+* `How to distribute Python modules with Distutils
+  <http://docs.python.org/dist/dist.html>`_
 
-- `Setuptools complete manual
-  <http://peak.telecommunity.com/DevCenter/setuptools>`_.
+* `Setuptools complete manual
+  <http://peak.telecommunity.com/DevCenter/setuptools>`_
 
-Thanks to Zooko O'Whielacronx for many improvements to this
-README.txt.
+Thanks to Zooko O'Whielacronx for many improvements to the documentation.
