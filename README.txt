@@ -11,11 +11,11 @@ all the files tracked by git.  This is an alternative to explicit
 inclusion specifications with `MANIFEST.in`.
 
 A package distribution here refers to a package that you create using
-setup.py, ex:
+setup.py, for example::
 
-  python setup.py sdist
-  python setup.py bdist_rpm
-  python setup.py bdist_egg
+  $> python setup.py sdist
+  $> python setup.py bdist_rpm
+  $> python setup.py bdist_egg
 
 This package was formerly known as gitlsfiles.  The name change is the
 result of an effort by the setuptools plugin developers to provide a
@@ -25,15 +25,15 @@ uniform naming convention.
 Installation
 ------------
 
-With easy_install:
+With easy_install::
 
-  easy_install setuptools_git
+  $> easy_install setuptools_git
 
-Alternative manual installation:
+Alternative manual installation::
 
-  tar -zxvf setuptools_git-X.Y.Z.tar.gz
-  cd setuptools_git-X.Y.Z
-  python setup.py install
+  $> tar -zxvf setuptools_git-X.Y.Z.tar.gz
+  $> cd setuptools_git-X.Y.Z
+  $> python setup.py install
 
 Where X.Y.Z is a version number.
 
@@ -44,17 +44,15 @@ Usage
 
 To activate this plugin, you must first package your python module
 with `setup.py` and use setuptools.  The former is well documented in
-the distutils manual:
-
-  http://docs.python.org/dist/dist.html
+the `distutils manual <http://docs.python.org/dist/dist.html>`_.
 
 To use setuptools instead of distutils, just edit `setup.py` and
-change
+change::
 
   from distutils.core import setup
 
-to
-  
+to::
+
   from setuptools import setup, find_packages
 
 When Setuptools builds a source package, it always includes all files
@@ -63,21 +61,21 @@ those files are.
 
 When Setuptools builds a binary package, you can ask it to include all
 files tracked by your revision control system, by adding these argument
-to your invocation of `setup()`:
+to your invocation of ``setup()``::
 
   setup(...,
-    packages=find_packages(),
-    include_package_data=True, 
-    ...)
+        packages=find_packages(),
+        include_package_data=True,
+        ...)
 
 which will detect that a directory is a package if it contains a
-`__init__.py` file.  Alternatively, you can do without `__init__.py`
-files and tell Setuptools explicitly which packages to process:
+``__init__.py`` file.  Alternatively, you can do without ``__init__.py``
+files and tell Setuptools explicitly which packages to process::
 
   setup(...,
-    packages=["a_package", "another_one"],
-    include_package_data=True, 
-    ...)
+        packages=["a_package", "another_one"],
+        include_package_data=True,
+        ...)
 
 This plugin lets setuptools know what files are tracked by your git
 revision control tool.  Setuptools ships with support for cvs and
@@ -87,28 +85,28 @@ monotone, mercurial, and many others.
 It might happen that you track files with your revision control system
 that you don't want to include in your packages.  In that case, you
 can prevent setuptools from packaging those files with a directive in
-your `MANIFEST.in`, ex:
+your ``MANIFEST.in``, for example::
 
   exclude .gitignore
   recursive-exclude images *.xcf *.blend
 
-In this example, we prevent setuptools from packaging `.gitignore` and
-the Gimp and Blender source files found under the `images` directory.
+In this example, we prevent setuptools from packaging ``.gitignore`` and
+the Gimp and Blender source files found under the ``images`` directory.
 
 Files to exclude from the package can also be listed in the `setup()`
-directive.  To do the same as the MANIFEST.in above, do:
+directive.  To do the same as the MANIFEST.in above, do::
 
   setup(...,
-    exclude_package_data = {'': ['.gitignore'], 
-    			    'images': ['*.xcf', '*.blend']},
-    ...)
+        exclude_package_data={'': ['.gitignore'],
+                              'images': ['*.xcf', '*.blend']},
+        ...)
 
-Here is another example:
+Here is another example::
 
   setup(...,
-    exclude_package_data = {'': ['.gitignore', 'artwork/*'],
-                            'model': ['config.py']},
-    ...)
+        exclude_package_data={'': ['.gitignore', 'artwork/*'],
+                              'model': ['config.py']},
+        ...)
 
 
 Gotchas
@@ -127,25 +125,21 @@ are a concern to you.
 
 You can make sure that anyone who clones your git repository and uses
 your setup.py file has this plugin by adding a `setup_requires`
-argument:
+argument::
 
   setup(...,
-    setup_requires = [ "setuptools_git >= 0.3", ],
-    ...)
-    
+        setup_requires=[ "setuptools_git >= 0.3", ],
+        ...)
+
 
 References
 ----------
 
-How to distribute Python modules with Distutils:
-  
-  http://docs.python.org/dist/dist.html
+- `How to distribute Python modules with Distutils
+  <http://docs.python.org/dist/dist.html>`_.
 
-
-Setuptools complete manual:
-
-  http://peak.telecommunity.com/DevCenter/setuptools
-
+- `Setuptools complete manual
+  <http://peak.telecommunity.com/DevCenter/setuptools>`_.
 
 Thanks to Zooko O'Whielacronx for many improvements to this
 README.txt.
