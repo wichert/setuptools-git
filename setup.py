@@ -16,7 +16,7 @@ except ImportError:
 
 version = '0.4.1'
 
-long_desc = open('README.txt').read()
+long_desc = open('README.rst').read()
 
 setup(
     name="setuptools-git",
