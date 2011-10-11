@@ -16,15 +16,7 @@ except ImportError:
 
 version = '0.4.1'
 
-long_desc="""
-This is a plugin for setup tools that enables Git integration.  Once
-installed, Setuptools can be told to include in a module distribution
-all the files tracked by git.  This is an alternative to explicit
-inclusion specifications with MANIFEST.in.
-
-This package was formerly known as gitlsfiles.  The name change is the
-result of an effort by the setuptools plugin developers to provide a
-uniform naming convention."""
+long_desc = open('README.txt').read()
 
 setup(
     name="setuptools-git",
