@@ -3,20 +3,26 @@ import unittest
 
 
 class GitTestCase(unittest.TestCase):
+
     def setUp(self):
         import os
-        import tempfile
-        from setuptools_git.compat import check_call
-        self.directory = tempfile.mkdtemp()
         self.old_cwd = os.getcwd()
-        os.chdir(self.directory)
-        check_call(['git', 'init', '--quiet', self.directory])
+        self.directory = self.new_repo()
 
     def tearDown(self):
         import os
         import shutil
         shutil.rmtree(self.directory)
         os.chdir(self.old_cwd)
+
+    def new_repo(self):
+        import os
+        import tempfile
+        from setuptools_git.compat import check_call
+        directory = tempfile.mkdtemp()
+        os.chdir(directory)
+        check_call(['git', 'init', '--quiet', directory])
+        return directory
 
     def create_file(self, *path):
         import os.path
@@ -36,6 +42,7 @@ class GitTestCase(unittest.TestCase):
 
 
 class list_git_files_tests(GitTestCase):
+
     def list_git_files(self, *a, **kw):
         from setuptools_git import list_git_files
         return list_git_files(*a, **kw)
@@ -47,7 +54,7 @@ class list_git_files_tests(GitTestCase):
                 self.list_git_files(self.directory),
                 set([os.path.realpath('root.txt')]))
 
-    def test_at_repo_subdir(self):
+    def test_at_repo_root_with_subdir(self):
         import os
         import os.path
         self.create_git_file('root.txt')
@@ -58,6 +65,17 @@ class list_git_files_tests(GitTestCase):
                 set([os.path.realpath('root.txt'),
                      os.path.realpath(os.path.join('subdir', 'entry.txt'))]))
 
+    def test_at_repo_subdir(self):
+        import os
+        import os.path
+        self.create_git_file('root.txt')
+        os.mkdir(os.path.join(self.directory, 'subdir'))
+        self.create_git_file('subdir', 'entry.txt')
+        self.assertEqual(
+                self.list_git_files(os.path.join(self.directory, 'subdir')),
+                set([os.path.realpath('root.txt'),
+                     os.path.realpath(os.path.join('subdir', 'entry.txt'))]))
+
     def test_nonascii_filename(self):
         import os.path
         self.create_git_file('héhé.html')
@@ -65,7 +83,43 @@ class list_git_files_tests(GitTestCase):
         self.assertEqual(result,
                          set([os.path.realpath('héhé.html')]))
 
+    def test_directory_symlink(self):
+        import os
+        import os.path
+        os.mkdir(os.path.join(self.directory, 'subdir'))
+        self.create_git_file('subdir', 'entry.txt')
+        os.mkdir(os.path.join(self.directory, 'package'))
+        self.create_git_file('package', 'root.txt')
+        os.symlink(
+                os.path.join(self.directory, 'subdir'),
+                os.path.join(self.directory, 'package', 'data'))
+        self.assertEqual(
+                set(self.list_git_files(os.path.join(self.directory, 'package'))),
+                set([os.path.realpath(os.path.join('subdir', 'entry.txt')),
+                     os.path.realpath(os.path.join('package', 'root.txt'))]))
+
+    def test_foreign_repo_symlink(self):
+        import os
+        import os.path
+        import shutil
+        os.mkdir(os.path.join(self.directory, 'subdir'))
+        self.create_git_file('subdir', 'entry.txt')
+        foreign = self.new_repo()
+        try:
+            os.mkdir(os.path.join(foreign, 'package'))
+            self.create_git_file('package', 'root.txt')
+            os.symlink(
+                    os.path.join(self.directory, 'subdir'),
+                    os.path.join(foreign, 'package', 'data'))
+            self.assertEqual(
+                    set(self.list_git_files(os.path.join(foreign, 'package'))),
+                    set([os.path.realpath(os.path.join('package', 'root.txt'))]))
+        finally:
+            shutil.rmtree(foreign)
+
+
 class gitlsfiles_tests(GitTestCase):
+
     def gitlsfiles(self, *a, **kw):
         from setuptools_git import gitlsfiles
         return gitlsfiles(*a, **kw)
@@ -94,6 +148,7 @@ class gitlsfiles_tests(GitTestCase):
 
     def test_directory_symlink(self):
         import os
+        import os.path
         os.mkdir(os.path.join(self.directory, 'subdir'))
         self.create_git_file('subdir', 'entry.txt')
         os.mkdir(os.path.join(self.directory, 'package'))
@@ -105,3 +160,23 @@ class gitlsfiles_tests(GitTestCase):
                 set(self.gitlsfiles(os.path.join(self.directory, 'package'))),
                 set(['root.txt',
                     os.path.join('data', 'entry.txt')]))
+
+    def test_foreign_repo_symlink(self):
+        import os
+        import os.path
+        import shutil
+        os.mkdir(os.path.join(self.directory, 'subdir'))
+        self.create_git_file('subdir', 'entry.txt')
+        foreign = self.new_repo()
+        try:
+            os.mkdir(os.path.join(foreign, 'package'))
+            self.create_git_file('package', 'root.txt')
+            os.symlink(
+                    os.path.join(self.directory, 'subdir'),
+                    os.path.join(foreign, 'package', 'data'))
+            self.assertEqual(
+                    set(self.gitlsfiles(os.path.join(foreign, 'package'))),
+                    set(['root.txt']))
+        finally:
+            shutil.rmtree(foreign)
+
