@@ -5,6 +5,7 @@ A hook into setuptools for Git.
 """
 
 import os
+import os.path
 from subprocess import CalledProcessError
 from subprocess import PIPE
 from distutils.log import warn
@@ -32,7 +33,7 @@ def list_git_files(cwd):
             stderr=PIPE, cwd=cwd).strip()
     ls = check_output(['git', 'ls-files', '-z'], cwd=git_top, stderr=PIPE)
     filenames = filter(None, ls.split('\x00')) # filter None for trailing \x00
-    git_files = set([os.path.join(git_top, fn) for fn in filenames ])
+    git_files = set([os.path.join(git_top, fn) for fn in filenames])
     return git_files
 
 
@@ -43,7 +44,6 @@ def gitlsfiles(dirname=''):
         else:
             cwd = None
             dirname = '.'
-        dirname = os.path.realpath(dirname)
         git_files = list_git_files(cwd)
     except (CalledProcessError, OSError):
         # Something went terribly wrong but the setuptools doc says we
@@ -53,6 +53,7 @@ def gitlsfiles(dirname=''):
         raise StopIteration
 
     # Include symlinked files and directories by their symlinked path
+    dirname = os.path.realpath(dirname)
     prefix_length = len(dirname) + 1
     for (root, dirs, files) in os.walk(dirname, followlinks=True):
         for file in files:
