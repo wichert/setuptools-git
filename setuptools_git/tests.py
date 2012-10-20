@@ -2,7 +2,7 @@
 import unittest
 
 
-# HFS Plus returns decomposed UTF-8
+# HFS Plus uses decomposed UTF-8
 def decompose(path):
     import unicodedata
     if isinstance(path, unicode):
@@ -92,8 +92,8 @@ class list_git_files_tests(GitTestCase):
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
                 self.list_git_files(self.directory),
-                set([os.path.realpath('root.txt'),
-                     os.path.realpath(os.path.join('subdir', 'entry.txt'))]))
+                set([os.path.realpath(os.path.join('subdir', 'entry.txt')),
+                     os.path.realpath('root.txt')]))
 
     def test_at_repo_subdir(self):
         import os
@@ -103,8 +103,8 @@ class list_git_files_tests(GitTestCase):
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
                 self.list_git_files(os.path.join(self.directory, 'subdir')),
-                set([os.path.realpath('root.txt'),
-                     os.path.realpath(os.path.join('subdir', 'entry.txt'))]))
+                set([os.path.realpath(os.path.join('subdir', 'entry.txt')),
+                     os.path.realpath('root.txt')]))
 
     def test_utf8_filename(self):
         import sys
@@ -148,7 +148,7 @@ class list_git_files_tests(GitTestCase):
                 os.path.join(self.directory, 'subdir'),
                 os.path.join(self.directory, 'package', 'data'))
         self.assertEqual(
-                set(self.list_git_files(os.path.join(self.directory, 'package'))),
+                self.list_git_files(os.path.join(self.directory, 'package')),
                 set([os.path.realpath(os.path.join('subdir', 'entry.txt')),
                      os.path.realpath(os.path.join('package', 'root.txt'))]))
 
@@ -166,7 +166,7 @@ class list_git_files_tests(GitTestCase):
                     os.path.join(self.directory, 'subdir'),
                     os.path.join(foreign, 'package', 'data'))
             self.assertEqual(
-                    set(self.list_git_files(os.path.join(foreign, 'package'))),
+                    self.list_git_files(os.path.join(foreign, 'package')),
                     set([os.path.realpath(os.path.join('package', 'root.txt'))]))
         finally:
             shutil.rmtree(foreign)
@@ -212,8 +212,8 @@ class gitlsfiles_tests(GitTestCase):
                 os.path.join(self.directory, 'package', 'data'))
         self.assertEqual(
                 set(self.gitlsfiles(os.path.join(self.directory, 'package'))),
-                set(['root.txt',
-                    os.path.join('data', 'entry.txt')]))
+                set([os.path.join('data', 'entry.txt'),
+                    'root.txt']))
 
     def test_foreign_repo_symlink(self):
         import os
