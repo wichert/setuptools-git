@@ -45,6 +45,14 @@ def b(s, encoding='utf-8'):
     return s
 
 
+# If path is Unicode, encode to filesystem encoding
+def fsencode(path):
+    if sys.version_info >= (3,):
+        if isinstance(path, str):
+            return path.encode(sys.getfilesystemencoding(), 'surrogateescape')
+    return path
+
+
 # Python 3 compatibility
 if sys.version_info >= (3,):
     from urllib.parse import quote as url_quote
@@ -52,4 +60,4 @@ else:
     from urllib import quote as url_quote
 
 
-__all__ = ['check_call', 'check_output', 'b', 'url_quote']
+__all__ = ['check_call', 'check_output', 'b', 'fsencode', 'url_quote']

@@ -2,6 +2,9 @@
 import sys
 import unittest
 
+from setuptools_git.compat import fsencode
+from setuptools_git.compat import url_quote
+
 # Python 3 compatibility
 if sys.version_info >= (3,):
     unicode = str
@@ -23,7 +26,6 @@ def decompose(path):
 
 # HFS Plus quotes unknown bytes like so: %F6
 def hfs_quote(path):
-    from setuptools_git.compat import url_quote
     if isinstance(path, unicode):
         raise TypeError('bytes are required')
     try:
@@ -86,7 +88,7 @@ class list_git_files_tests(GitTestCase):
         self.create_git_file('root.txt')
         self.assertEqual(
                 self.list_git_files(self.directory),
-                set([os.path.realpath('root.txt')]))
+                set([fsencode(os.path.realpath('root.txt'))]))
 
     def test_at_repo_root_with_subdir(self):
         import os
@@ -96,8 +98,8 @@ class list_git_files_tests(GitTestCase):
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
                 self.list_git_files(self.directory),
-                set([os.path.realpath(os.path.join('subdir', 'entry.txt')),
-                     os.path.realpath('root.txt')]))
+                set([fsencode(os.path.realpath(os.path.join('subdir', 'entry.txt'))),
+                     fsencode(os.path.realpath('root.txt'))]))
 
     def test_at_repo_subdir(self):
         import os
@@ -107,8 +109,8 @@ class list_git_files_tests(GitTestCase):
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
                 self.list_git_files(os.path.join(self.directory, 'subdir')),
-                set([os.path.realpath(os.path.join('subdir', 'entry.txt')),
-                     os.path.realpath('root.txt')]))
+                set([fsencode(os.path.realpath(os.path.join('subdir', 'entry.txt'))),
+                     fsencode(os.path.realpath('root.txt'))]))
 
     def test_utf8_filename(self):
         import os.path
@@ -121,7 +123,7 @@ class list_git_files_tests(GitTestCase):
         self.create_git_file(filename)
         result = self.list_git_files(self.directory)
         self.assertEqual(result,
-                         set([os.path.realpath(filename)]))
+                         set([fsencode(os.path.realpath(filename))]))
 
     def test_latin1_filename(self):
         import os.path
@@ -137,7 +139,7 @@ class list_git_files_tests(GitTestCase):
         self.create_git_file(filename)
         result = self.list_git_files(self.directory)
         self.assertEqual(result,
-                         set([os.path.realpath(filename)]))
+                         set([fsencode(os.path.realpath(filename))]))
 
     def test_directory_symlink(self):
         import os
@@ -151,8 +153,8 @@ class list_git_files_tests(GitTestCase):
                 os.path.join(self.directory, 'package', 'data'))
         self.assertEqual(
                 set(self.list_git_files(os.path.join(self.directory, 'package'))),
-                set([os.path.realpath(os.path.join('subdir', 'entry.txt')),
-                     os.path.realpath(os.path.join('package', 'root.txt'))]))
+                set([fsencode(os.path.realpath(os.path.join('subdir', 'entry.txt'))),
+                     fsencode(os.path.realpath(os.path.join('package', 'root.txt')))]))
 
     def test_foreign_repo_symlink(self):
         import os
@@ -169,7 +171,7 @@ class list_git_files_tests(GitTestCase):
                     os.path.join(foreign, 'package', 'data'))
             self.assertEqual(
                     set(self.list_git_files(os.path.join(foreign, 'package'))),
-                    set([os.path.realpath(os.path.join('package', 'root.txt'))]))
+                    set([fsencode(os.path.realpath(os.path.join('package', 'root.txt')))]))
         finally:
             shutil.rmtree(foreign)
 
