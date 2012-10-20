@@ -214,6 +214,37 @@ class gitlsfiles_tests(GitTestCase):
                 set(self.gitlsfiles()),
                 set(['entry.txt']))
 
+    def test_utf8_filename(self):
+        import sys
+        import os.path
+        filename = 'héhé.html'
+
+        # HFS Plus uses decomposed UTF-8
+        if sys.platform == 'darwin':
+            filename = decompose(filename)
+
+        self.create_git_file(filename)
+        result = self.gitlsfiles()
+        self.assertEqual(set(result),
+                         set([filename]))
+
+    def test_latin1_filename(self):
+        import sys
+        import os.path
+        if sys.version_info >= (3,):
+            filename = 'héhé.html'.encode('latin-1')
+        else:
+            filename = 'h\xe9h\xe9.html'
+
+        # HFS Plus quotes unknown bytes
+        if sys.platform == 'darwin':
+            filename = hfs_quote(filename)
+
+        self.create_git_file(filename)
+        result = self.gitlsfiles()
+        self.assertEqual(set(result),
+                         set([filename]))
+
     def test_directory_symlink(self):
         import os
         import os.path
