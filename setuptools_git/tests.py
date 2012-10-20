@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
+import sys
 import unittest
+
+# Python 3 compatibility
+if sys.version_info >= (3,):
+    unicode = str
 
 
 # HFS Plus returns decomposed UTF-8
@@ -18,14 +23,13 @@ def decompose(path):
 
 # HFS Plus quotes unknown bytes like so: %F6
 def hfs_quote(path):
-    import sys
-    import urllib
+    from setuptools_git.compat import url_quote
     if isinstance(path, unicode):
         raise TypeError('bytes are required')
     try:
         u = path.decode('utf-8')
     except UnicodeDecodeError:
-        path = urllib.quote(path) # Not UTF-8
+        path = url_quote(path) # Not UTF-8
     else:
         if sys.version_info >= (3,):
             path = u
@@ -57,7 +61,7 @@ class GitTestCase(unittest.TestCase):
     def create_file(self, *path):
         import os.path
         fd = open(os.path.join(*path), 'wt')
-        print >>fd, 'dummy'
+        fd.write('dummy\n')
         fd.close()
 
     def create_git_file(self, *path):
@@ -65,7 +69,7 @@ class GitTestCase(unittest.TestCase):
         from setuptools_git.compat import check_call
         filename = os.path.join(*path)
         fd = open(filename, 'wt')
-        print >>fd, 'dummy'
+        fd.write('dummy\n')
         fd.close()
         check_call(['git', 'add', filename])
         check_call(['git', 'commit', '--quiet', '-m', 'add new file'])
@@ -107,7 +111,6 @@ class list_git_files_tests(GitTestCase):
                      os.path.realpath('root.txt')]))
 
     def test_utf8_filename(self):
-        import sys
         import os.path
         filename = 'héhé.html'
 
@@ -121,7 +124,6 @@ class list_git_files_tests(GitTestCase):
                          set([os.path.realpath(filename)]))
 
     def test_latin1_filename(self):
-        import sys
         import os.path
         if sys.version_info >= (3,):
             filename = 'héhé.html'.encode('latin-1')
@@ -215,7 +217,6 @@ class gitlsfiles_tests(GitTestCase):
                 set(['entry.txt']))
 
     def test_utf8_filename(self):
-        import sys
         import os.path
         filename = 'héhé.html'
 
@@ -229,7 +230,6 @@ class gitlsfiles_tests(GitTestCase):
                          set([filename]))
 
     def test_latin1_filename(self):
-        import sys
         import os.path
         if sys.version_info >= (3,):
             filename = 'héhé.html'.encode('latin-1')

@@ -10,6 +10,7 @@ from subprocess import CalledProcessError
 from subprocess import PIPE
 from distutils.log import warn
 from setuptools_git.compat import check_output
+from setuptools_git.compat import b
 
 
 def list_git_files(cwd):
@@ -32,7 +33,7 @@ def list_git_files(cwd):
     git_top = check_output(['git', 'rev-parse', '--show-toplevel'],
             stderr=PIPE, cwd=cwd).strip()
     ls = check_output(['git', 'ls-files', '-z'], cwd=git_top, stderr=PIPE)
-    filenames = filter(None, ls.split('\x00')) # filter None for trailing \x00
+    filenames = filter(None, ls.split(b('\x00'))) # filter None for trailing \x00
     git_files = set([os.path.join(git_top, fn) for fn in filenames])
     return git_files
 

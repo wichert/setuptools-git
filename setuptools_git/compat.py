@@ -1,3 +1,5 @@
+import sys
+
 try:
     from subprocess import check_call
 except ImportError:
@@ -35,4 +37,19 @@ except ImportError:
             raise CalledProcessError(retcode, cmd)
         return output
 
-__all__ = ['check_call', 'check_output']
+
+# Fake byte literals for Python <= 2.5
+def b(s, encoding='utf-8'):
+    if sys.version_info >= (3,):
+        return s.encode(encoding)
+    return s
+
+
+# Python 3 compatibility
+if sys.version_info >= (3,):
+    from urllib.parse import quote as url_quote
+else:
+    from urllib import quote as url_quote
+
+
+__all__ = ['check_call', 'check_output', 'b', 'url_quote']
