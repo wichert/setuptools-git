@@ -52,6 +52,7 @@ def gitlsfiles(dirname=''):
         warn('Error running git')
         raise StopIteration
 
+    # Include symlinked files and directories by their symlinked path
     prefix_length = len(dirname) + 1
     for (root, dirs, files) in os.walk(dirname, followlinks=True):
         for file in files:
