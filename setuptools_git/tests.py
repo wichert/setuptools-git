@@ -2,6 +2,36 @@
 import unittest
 
 
+# HFS Plus returns decomposed UTF-8
+def decompose(path):
+    import unicodedata
+    if isinstance(path, unicode):
+        return unicodedata.normalize('NFD', path)
+    try:
+        path = path.decode('utf-8')
+        path = unicodedata.normalize('NFD', path)
+        path = path.encode('utf-8')
+    except UnicodeError:
+        pass # Not UTF-8
+    return path
+
+
+# HFS Plus quotes unknown bytes like so: %F6
+def hfs_quote(path):
+    import sys
+    import urllib
+    if isinstance(path, unicode):
+        raise TypeError('bytes are required')
+    try:
+        u = path.decode('utf-8')
+    except UnicodeDecodeError:
+        path = urllib.quote(path) # Not UTF-8
+    else:
+        if sys.version_info >= (3,):
+            path = u
+    return path
+
+
 class GitTestCase(unittest.TestCase):
 
     def setUp(self):
@@ -76,12 +106,36 @@ class list_git_files_tests(GitTestCase):
                 set([os.path.realpath('root.txt'),
                      os.path.realpath(os.path.join('subdir', 'entry.txt'))]))
 
-    def test_nonascii_filename(self):
+    def test_utf8_filename(self):
+        import sys
         import os.path
-        self.create_git_file('héhé.html')
+        filename = 'héhé.html'
+
+        # HFS Plus uses decomposed UTF-8
+        if sys.platform == 'darwin':
+            filename = decompose(filename)
+
+        self.create_git_file(filename)
         result = self.list_git_files(self.directory)
         self.assertEqual(result,
-                         set([os.path.realpath('héhé.html')]))
+                         set([os.path.realpath(filename)]))
+
+    def test_latin1_filename(self):
+        import sys
+        import os.path
+        if sys.version_info >= (3,):
+            filename = 'héhé.html'.encode('latin-1')
+        else:
+            filename = 'h\xe9h\xe9.html'
+
+        # HFS Plus quotes unknown bytes
+        if sys.platform == 'darwin':
+            filename = hfs_quote(filename)
+
+        self.create_git_file(filename)
+        result = self.list_git_files(self.directory)
+        self.assertEqual(result,
+                         set([os.path.realpath(filename)]))
 
     def test_directory_symlink(self):
         import os
