@@ -92,8 +92,8 @@ class list_git_files_tests(GitTestCase):
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
                 self.list_git_files(self.directory),
-                set([os.path.realpath('root.txt'),
-                     os.path.realpath(os.path.join('subdir', 'entry.txt'))]))
+                set([os.path.realpath(os.path.join('subdir', 'entry.txt')),
+                     os.path.realpath('root.txt')]))
 
     def test_at_repo_subdir(self):
         import os
@@ -103,8 +103,8 @@ class list_git_files_tests(GitTestCase):
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
                 self.list_git_files(os.path.join(self.directory, 'subdir')),
-                set([os.path.realpath('root.txt'),
-                     os.path.realpath(os.path.join('subdir', 'entry.txt'))]))
+                set([os.path.realpath(os.path.join('subdir', 'entry.txt')),
+                     os.path.realpath('root.txt')]))
 
     def test_utf8_filename(self):
         import sys
@@ -181,7 +181,7 @@ class gitlsfiles_tests(GitTestCase):
     def test_empty_dirname(self):
         self.create_git_file('root.txt')
         self.assertEqual(
-                set(self.gitlsfiles('')),
+                set(self.gitlsfiles()),
                 set(['root.txt']))
 
     def test_specify_full_path(self):
@@ -199,7 +199,7 @@ class gitlsfiles_tests(GitTestCase):
         os.mkdir(os.path.join(self.directory, 'subdir'))
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
-                set(self.gitlsfiles(self.directory)),
+                set(self.gitlsfiles()),
                 set([os.path.join('subdir', 'entry.txt'),
                      'root.txt']))
 
@@ -209,8 +209,9 @@ class gitlsfiles_tests(GitTestCase):
         self.create_git_file('root.txt')
         os.mkdir(os.path.join(self.directory, 'subdir'))
         self.create_git_file('subdir', 'entry.txt')
+        os.chdir('subdir')
         self.assertEqual(
-                set(self.gitlsfiles(os.path.join(self.directory, 'subdir'))),
+                set(self.gitlsfiles()),
                 set(['entry.txt']))
 
     def test_directory_symlink(self):
@@ -223,10 +224,11 @@ class gitlsfiles_tests(GitTestCase):
         os.symlink(
                 os.path.join(self.directory, 'subdir'),
                 os.path.join(self.directory, 'package', 'data'))
+        os.chdir('package')
         self.assertEqual(
-                set(self.gitlsfiles(os.path.join(self.directory, 'package'))),
-                set(['root.txt',
-                    os.path.join('data', 'entry.txt')]))
+                set(self.gitlsfiles()),
+                set([os.path.join('data', 'entry.txt'),
+                     'root.txt']))
 
     def test_foreign_repo_symlink(self):
         import os
@@ -241,8 +243,9 @@ class gitlsfiles_tests(GitTestCase):
             os.symlink(
                     os.path.join(self.directory, 'subdir'),
                     os.path.join(foreign, 'package', 'data'))
+            os.chdir(os.path.join(foreign, 'package'))
             self.assertEqual(
-                    set(self.gitlsfiles(os.path.join(foreign, 'package'))),
+                    set(self.gitlsfiles()),
                     set(['root.txt']))
         finally:
             shutil.rmtree(foreign)
