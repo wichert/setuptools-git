@@ -103,8 +103,23 @@ class list_git_files_tests(GitTestCase):
                 set([fsencode(realpath(join('subdir', 'entry.txt'))),
                      fsencode(realpath('root.txt'))]))
 
-    def test_utf8_filename(self):
+    def test_nonascii_filename(self):
         filename = 'héhé.html'
+
+        # HFS Plus uses decomposed UTF-8
+        if sys.platform == 'darwin':
+            filename = decompose(filename)
+
+        self.create_git_file(filename)
+        self.assertEqual(
+                self.list_git_files(self.directory),
+                set([fsencode(realpath(filename))]))
+
+    def test_utf8_filename(self):
+        if sys.version_info >= (3,):
+            filename = 'héhé.html'.encode('utf-8')
+        else:
+            filename = 'héhé.html'
 
         # HFS Plus uses decomposed UTF-8
         if sys.platform == 'darwin':
@@ -197,7 +212,7 @@ class gitlsfiles_tests(GitTestCase):
                 set(self.gitlsfiles()),
                 set(['entry.txt']))
 
-    def test_utf8_filename(self):
+    def test_nonascii_filename(self):
         filename = 'héhé.html'
 
         # HFS Plus uses decomposed UTF-8
@@ -208,6 +223,21 @@ class gitlsfiles_tests(GitTestCase):
         self.assertEqual(
                 set(self.gitlsfiles()),
                 set([filename]))
+
+    def test_utf8_filename(self):
+        if sys.version_info >= (3,):
+            filename = 'héhé.html'.encode('utf-8')
+        else:
+            filename = 'héhé.html'
+
+        # HFS Plus uses decomposed UTF-8
+        if sys.platform == 'darwin':
+            filename = decompose(filename)
+
+        self.create_git_file(filename)
+        self.assertEqual(
+                set(self.gitlsfiles()),
+                set([fsdecode(filename)]))
 
     def test_latin1_filename(self):
         if sys.version_info >= (3,):
