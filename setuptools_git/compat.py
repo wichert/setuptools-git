@@ -38,18 +38,18 @@ except ImportError:
         return output
 
 
+# Python 3 compatibility imports
+if sys.version_info >= (3,):
+    from urllib.parse import quote as url_quote
+else:
+    from urllib import quote as url_quote
+
+
 # Fake byte literals for Python <= 2.5
 def b(s, encoding='utf-8'):
     if sys.version_info >= (3,):
         return s.encode(encoding)
     return s
-
-
-# Python 3 compatibility import
-if sys.version_info >= (3,):
-    from urllib.parse import quote as url_quote
-else:
-    from urllib import quote as url_quote
 
 
 # Encode path to fs encoding under Python 3
@@ -68,4 +68,11 @@ def fsdecode(path):
     return path
 
 
-__all__ = ['check_call', 'check_output', 'b', 'url_quote', 'fsencode', 'fsdecode']
+# Convert path to POSIX path on Windows
+def posix(path):
+    if sys.platform == 'win32':
+        return path.replace(os.sep, '/')
+    return path
+
+
+__all__ = ['check_call', 'check_output', 'url_quote', 'b', 'fsencode', 'fsdecode', 'posix']

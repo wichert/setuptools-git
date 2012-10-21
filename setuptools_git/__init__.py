@@ -6,12 +6,18 @@ A hook into setuptools for Git.
 
 import os
 import sys
-from os.path import realpath, join
+import os.path
+import posixpath
+
+from os.path import realpath
 from subprocess import CalledProcessError
 from subprocess import PIPE
 from distutils import log
+
 from setuptools_git.compat import check_output
-from setuptools_git.compat import b, fsencode
+from setuptools_git.compat import b
+from setuptools_git.compat import fsencode
+from setuptools_git.compat import posix
 
 
 def list_git_files(cwd):
@@ -40,7 +46,7 @@ def list_git_files(cwd):
         log.warn("%s: Error running 'git ls-files'", __name__)
         raise
     filenames = filter(None, filenames.split(b('\x00')))
-    filenames = [join(git_top, fn) for fn in filenames]
+    filenames = [posixpath.join(git_top, fn) for fn in filenames]
     return set(filenames)
 
 
@@ -50,22 +56,20 @@ def gitlsfiles(dirname=''):
     else:
         cwd = None
         dirname = '.'
-
     try:
         git_files = list_git_files(cwd)
     except (CalledProcessError, OSError):
-        # Something went terribly wrong but the setuptools doc says we
-        # must be strong in the face of danger.  We shall not run away
-        # in panic.
         raise StopIteration
 
-    # Include symlinked files and directories by their symlinked path
+    # Return files and directories by their OS path. Follow
+    # symbolic links and include their targets if they stem
+    # from the same repository.
     dirname = realpath(dirname)
     prefix_length = len(dirname) + 1
     for (root, dirs, files) in os.walk(dirname, followlinks=True):
         for file in files:
-            filename = join(root, file)
-            realname = fsencode(realpath(filename))
+            filename = os.path.join(root, file)
+            realname = fsencode(posix(realpath(filename)))
             if realname in git_files:
                 yield filename[prefix_length:]
 

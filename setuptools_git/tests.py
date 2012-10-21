@@ -10,6 +10,7 @@ from os.path import realpath, join
 from setuptools_git.compat import url_quote
 from setuptools_git.compat import fsencode
 from setuptools_git.compat import fsdecode
+from setuptools_git.compat import posix
 
 if sys.version_info >= (3,):
     unicode = str
@@ -48,8 +49,8 @@ class GitTestCase(unittest.TestCase):
         self.directory = self.new_repo()
 
     def tearDown(self):
-        shutil.rmtree(self.directory)
         os.chdir(self.old_cwd)
+        shutil.rmtree(self.directory, True)
 
     def new_repo(self):
         from setuptools_git.compat import check_call
@@ -83,7 +84,7 @@ class list_git_files_tests(GitTestCase):
         self.create_git_file('root.txt')
         self.assertEqual(
                 self.list_git_files(self.directory),
-                set([fsencode(realpath('root.txt'))]))
+                set([fsencode(posix(realpath('root.txt')))]))
 
     def test_at_repo_root_with_subdir(self):
         self.create_git_file('root.txt')
@@ -91,8 +92,8 @@ class list_git_files_tests(GitTestCase):
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
                 self.list_git_files(self.directory),
-                set([fsencode(realpath(join('subdir', 'entry.txt'))),
-                     fsencode(realpath('root.txt'))]))
+                set([fsencode(posix(realpath(join('subdir', 'entry.txt')))),
+                     fsencode(posix(realpath('root.txt')))]))
 
     def test_at_repo_subdir(self):
         self.create_git_file('root.txt')
@@ -100,8 +101,8 @@ class list_git_files_tests(GitTestCase):
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
                 self.list_git_files(join(self.directory, 'subdir')),
-                set([fsencode(realpath(join('subdir', 'entry.txt'))),
-                     fsencode(realpath('root.txt'))]))
+                set([fsencode(posix(realpath(join('subdir', 'entry.txt')))),
+                     fsencode(posix(realpath('root.txt')))]))
 
     def test_nonascii_filename(self):
         filename = 'héhé.html'
@@ -111,9 +112,10 @@ class list_git_files_tests(GitTestCase):
             filename = decompose(filename)
 
         self.create_git_file(filename)
+
         self.assertEqual(
                 self.list_git_files(self.directory),
-                set([fsencode(realpath(filename))]))
+                set([fsencode(posix(realpath(filename)))]))
 
     def test_utf8_filename(self):
         if sys.version_info >= (3,):
@@ -128,7 +130,7 @@ class list_git_files_tests(GitTestCase):
         self.create_git_file(filename)
         self.assertEqual(
                 self.list_git_files(self.directory),
-                set([fsencode(realpath(filename))]))
+                set([fsencode(posix(realpath(filename)))]))
 
     def test_latin1_filename(self):
         if sys.version_info >= (3,):
@@ -143,36 +145,38 @@ class list_git_files_tests(GitTestCase):
         self.create_git_file(filename)
         self.assertEqual(
                 self.list_git_files(self.directory),
-                set([fsencode(realpath(filename))]))
+                set([fsencode(posix(realpath(filename)))]))
 
-    def test_directory_symlink(self):
-        os.mkdir(join(self.directory, 'subdir'))
-        self.create_git_file('subdir', 'entry.txt')
-        os.mkdir(join(self.directory, 'package'))
-        self.create_git_file('package', 'root.txt')
-        os.symlink(
-                join(self.directory, 'subdir'),
-                join(self.directory, 'package', 'data'))
-        self.assertEqual(
-                set(self.list_git_files(join(self.directory, 'package'))),
-                set([fsencode(realpath(join('subdir', 'entry.txt'))),
-                     fsencode(realpath(join('package', 'root.txt')))]))
+    if sys.platform != 'win32':
 
-    def test_foreign_repo_symlink(self):
-        os.mkdir(join(self.directory, 'subdir'))
-        self.create_git_file('subdir', 'entry.txt')
-        foreign = self.new_repo()
-        try:
-            os.mkdir(join(foreign, 'package'))
+        def test_directory_symlink(self):
+            os.mkdir(join(self.directory, 'subdir'))
+            self.create_git_file('subdir', 'entry.txt')
+            os.mkdir(join(self.directory, 'package'))
             self.create_git_file('package', 'root.txt')
             os.symlink(
                     join(self.directory, 'subdir'),
-                    join(foreign, 'package', 'data'))
+                    join(self.directory, 'package', 'data'))
             self.assertEqual(
-                    set(self.list_git_files(join(foreign, 'package'))),
-                    set([fsencode(realpath(join('package', 'root.txt')))]))
-        finally:
-            shutil.rmtree(foreign)
+                    set(self.list_git_files(join(self.directory, 'package'))),
+                    set([fsencode(realpath(join('subdir', 'entry.txt'))),
+                         fsencode(realpath(join('package', 'root.txt')))]))
+
+        def test_foreign_repo_symlink(self):
+            os.mkdir(join(self.directory, 'subdir'))
+            self.create_git_file('subdir', 'entry.txt')
+            foreign = self.new_repo()
+            try:
+                os.mkdir(join(foreign, 'package'))
+                self.create_git_file('package', 'root.txt')
+                os.symlink(
+                        join(self.directory, 'subdir'),
+                        join(foreign, 'package', 'data'))
+                self.assertEqual(
+                        set(self.list_git_files(join(foreign, 'package'))),
+                        set([fsencode(realpath(join('package', 'root.txt')))]))
+            finally:
+                shutil.rmtree(foreign, True)
 
 
 class gitlsfiles_tests(GitTestCase):
@@ -254,34 +258,36 @@ class gitlsfiles_tests(GitTestCase):
                 set(self.gitlsfiles()),
                 set([fsdecode(filename)]))
 
-    def test_directory_symlink(self):
-        os.mkdir(join(self.directory, 'subdir'))
-        self.create_git_file('subdir', 'entry.txt')
-        os.mkdir(join(self.directory, 'package'))
-        self.create_git_file('package', 'root.txt')
-        os.symlink(
-                join(self.directory, 'subdir'),
-                join(self.directory, 'package', 'data'))
-        os.chdir('package')
-        self.assertEqual(
-                set(self.gitlsfiles()),
-                set([join('data', 'entry.txt'),
-                     'root.txt']))
+    if sys.platform != 'win32':
 
-    def test_foreign_repo_symlink(self):
-        os.mkdir(join(self.directory, 'subdir'))
-        self.create_git_file('subdir', 'entry.txt')
-        foreign = self.new_repo()
-        try:
-            os.mkdir(join(foreign, 'package'))
+        def test_directory_symlink(self):
+            os.mkdir(join(self.directory, 'subdir'))
+            self.create_git_file('subdir', 'entry.txt')
+            os.mkdir(join(self.directory, 'package'))
             self.create_git_file('package', 'root.txt')
             os.symlink(
                     join(self.directory, 'subdir'),
-                    join(foreign, 'package', 'data'))
-            os.chdir(join(foreign, 'package'))
+                    join(self.directory, 'package', 'data'))
+            os.chdir('package')
             self.assertEqual(
                     set(self.gitlsfiles()),
-                    set(['root.txt']))
-        finally:
-            shutil.rmtree(foreign)
+                    set([join('data', 'entry.txt'),
+                         'root.txt']))
+
+        def test_foreign_repo_symlink(self):
+            os.mkdir(join(self.directory, 'subdir'))
+            self.create_git_file('subdir', 'entry.txt')
+            foreign = self.new_repo()
+            try:
+                os.mkdir(join(foreign, 'package'))
+                self.create_git_file('package', 'root.txt')
+                os.symlink(
+                        join(self.directory, 'subdir'),
+                        join(foreign, 'package', 'data'))
+                os.chdir(join(foreign, 'package'))
+                self.assertEqual(
+                        set(self.gitlsfiles()),
+                        set(['root.txt']))
+            finally:
+                shutil.rmtree(foreign, True)
 
