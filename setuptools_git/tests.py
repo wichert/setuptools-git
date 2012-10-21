@@ -9,6 +9,7 @@ import unittest
 from os.path import realpath, join
 from setuptools_git.compat import url_quote
 from setuptools_git.compat import fsencode
+from setuptools_git.compat import fsdecode
 
 if sys.version_info >= (3,):
     unicode = str
@@ -219,11 +220,9 @@ class gitlsfiles_tests(GitTestCase):
             filename = hfs_quote(filename)
 
         self.create_git_file(filename)
-        if sys.version_info >= (3,):
-            filename = filename.decode('latin-1')
         self.assertEqual(
                 set(self.gitlsfiles()),
-                set([filename]))
+                set([fsdecode(filename)]))
 
     def test_directory_symlink(self):
         os.mkdir(join(self.directory, 'subdir'))
