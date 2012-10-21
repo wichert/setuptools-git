@@ -220,6 +220,8 @@ class gitlsfiles_tests(GitTestCase):
             filename = hfs_quote(filename)
 
         self.create_git_file(filename)
+        if sys.version_info >= (3,):
+            filename = filename.decode('latin-1')
         self.assertEqual(
                 set(self.gitlsfiles()),
                 set([filename]))
