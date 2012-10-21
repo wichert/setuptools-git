@@ -32,12 +32,11 @@ def hfs_quote(path):
     if isinstance(path, unicode):
         raise TypeError('bytes are required')
     try:
-        u = path.decode('utf-8')
+        path.decode('utf-8')
     except UnicodeDecodeError:
         path = url_quote(path) # Not UTF-8
-    else:
         if sys.version_info >= (3,):
-            path = u
+            path = path.encode('ascii')
     return path
 
 
