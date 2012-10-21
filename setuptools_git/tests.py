@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
 import sys
+import os
+import shutil
+import unicodedata
+import tempfile
 import unittest
 
-from setuptools_git.compat import fsencode
+from os.path import realpath, join
 from setuptools_git.compat import url_quote
+from setuptools_git.compat import fsencode
 
-# Python 3 compatibility
 if sys.version_info >= (3,):
     unicode = str
 
 
 # HFS Plus returns decomposed UTF-8
 def decompose(path):
-    import unicodedata
     if isinstance(path, unicode):
         return unicodedata.normalize('NFD', path)
     try:
@@ -41,35 +44,28 @@ def hfs_quote(path):
 class GitTestCase(unittest.TestCase):
 
     def setUp(self):
-        import os
         self.old_cwd = os.getcwd()
         self.directory = self.new_repo()
 
     def tearDown(self):
-        import os
-        import shutil
         shutil.rmtree(self.directory)
         os.chdir(self.old_cwd)
 
     def new_repo(self):
-        import os
-        import tempfile
         from setuptools_git.compat import check_call
-        directory = tempfile.mkdtemp()
+        directory = realpath(tempfile.mkdtemp())
         os.chdir(directory)
         check_call(['git', 'init', '--quiet', directory])
         return directory
 
     def create_file(self, *path):
-        import os.path
-        fd = open(os.path.join(*path), 'wt')
+        fd = open(join(*path), 'wt')
         fd.write('dummy\n')
         fd.close()
 
     def create_git_file(self, *path):
-        import os.path
         from setuptools_git.compat import check_call
-        filename = os.path.join(*path)
+        filename = join(*path)
         fd = open(filename, 'wt')
         fd.write('dummy\n')
         fd.close()
@@ -84,36 +80,30 @@ class list_git_files_tests(GitTestCase):
         return list_git_files(*a, **kw)
 
     def test_at_repo_root(self):
-        import os.path
         self.create_git_file('root.txt')
         self.assertEqual(
                 self.list_git_files(self.directory),
-                set([fsencode(os.path.realpath('root.txt'))]))
+                set([fsencode(realpath('root.txt'))]))
 
     def test_at_repo_root_with_subdir(self):
-        import os
-        import os.path
         self.create_git_file('root.txt')
-        os.mkdir(os.path.join(self.directory, 'subdir'))
+        os.mkdir(join(self.directory, 'subdir'))
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
                 self.list_git_files(self.directory),
-                set([fsencode(os.path.realpath(os.path.join('subdir', 'entry.txt'))),
-                     fsencode(os.path.realpath('root.txt'))]))
+                set([fsencode(realpath(join('subdir', 'entry.txt'))),
+                     fsencode(realpath('root.txt'))]))
 
     def test_at_repo_subdir(self):
-        import os
-        import os.path
         self.create_git_file('root.txt')
-        os.mkdir(os.path.join(self.directory, 'subdir'))
+        os.mkdir(join(self.directory, 'subdir'))
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
-                self.list_git_files(os.path.join(self.directory, 'subdir')),
-                set([fsencode(os.path.realpath(os.path.join('subdir', 'entry.txt'))),
-                     fsencode(os.path.realpath('root.txt'))]))
+                self.list_git_files(join(self.directory, 'subdir')),
+                set([fsencode(realpath(join('subdir', 'entry.txt'))),
+                     fsencode(realpath('root.txt'))]))
 
     def test_utf8_filename(self):
-        import os.path
         filename = 'héhé.html'
 
         # HFS Plus uses decomposed UTF-8
@@ -121,12 +111,11 @@ class list_git_files_tests(GitTestCase):
             filename = decompose(filename)
 
         self.create_git_file(filename)
-        result = self.list_git_files(self.directory)
-        self.assertEqual(result,
-                         set([fsencode(os.path.realpath(filename))]))
+        self.assertEqual(
+                self.list_git_files(self.directory),
+                set([fsencode(realpath(filename))]))
 
     def test_latin1_filename(self):
-        import os.path
         if sys.version_info >= (3,):
             filename = 'héhé.html'.encode('latin-1')
         else:
@@ -137,41 +126,36 @@ class list_git_files_tests(GitTestCase):
             filename = hfs_quote(filename)
 
         self.create_git_file(filename)
-        result = self.list_git_files(self.directory)
-        self.assertEqual(result,
-                         set([fsencode(os.path.realpath(filename))]))
+        self.assertEqual(
+                self.list_git_files(self.directory),
+                set([fsencode(realpath(filename))]))
 
     def test_directory_symlink(self):
-        import os
-        import os.path
-        os.mkdir(os.path.join(self.directory, 'subdir'))
+        os.mkdir(join(self.directory, 'subdir'))
         self.create_git_file('subdir', 'entry.txt')
-        os.mkdir(os.path.join(self.directory, 'package'))
+        os.mkdir(join(self.directory, 'package'))
         self.create_git_file('package', 'root.txt')
         os.symlink(
-                os.path.join(self.directory, 'subdir'),
-                os.path.join(self.directory, 'package', 'data'))
+                join(self.directory, 'subdir'),
+                join(self.directory, 'package', 'data'))
         self.assertEqual(
-                set(self.list_git_files(os.path.join(self.directory, 'package'))),
-                set([fsencode(os.path.realpath(os.path.join('subdir', 'entry.txt'))),
-                     fsencode(os.path.realpath(os.path.join('package', 'root.txt')))]))
+                set(self.list_git_files(join(self.directory, 'package'))),
+                set([fsencode(realpath(join('subdir', 'entry.txt'))),
+                     fsencode(realpath(join('package', 'root.txt')))]))
 
     def test_foreign_repo_symlink(self):
-        import os
-        import os.path
-        import shutil
-        os.mkdir(os.path.join(self.directory, 'subdir'))
+        os.mkdir(join(self.directory, 'subdir'))
         self.create_git_file('subdir', 'entry.txt')
         foreign = self.new_repo()
         try:
-            os.mkdir(os.path.join(foreign, 'package'))
+            os.mkdir(join(foreign, 'package'))
             self.create_git_file('package', 'root.txt')
             os.symlink(
-                    os.path.join(self.directory, 'subdir'),
-                    os.path.join(foreign, 'package', 'data'))
+                    join(self.directory, 'subdir'),
+                    join(foreign, 'package', 'data'))
             self.assertEqual(
-                    set(self.list_git_files(os.path.join(foreign, 'package'))),
-                    set([fsencode(os.path.realpath(os.path.join('package', 'root.txt')))]))
+                    set(self.list_git_files(join(foreign, 'package'))),
+                    set([fsencode(realpath(join('package', 'root.txt')))]))
         finally:
             shutil.rmtree(foreign)
 
@@ -189,7 +173,6 @@ class gitlsfiles_tests(GitTestCase):
                 set(['root.txt']))
 
     def test_specify_full_path(self):
-        import os
         self.create_git_file('root.txt')
         os.chdir(self.old_cwd)
         self.assertEqual(
@@ -197,21 +180,17 @@ class gitlsfiles_tests(GitTestCase):
                 set(['root.txt']))
 
     def test_at_repo_root_with_subdir(self):
-        import os
-        import os.path
         self.create_git_file('root.txt')
-        os.mkdir(os.path.join(self.directory, 'subdir'))
+        os.mkdir(join(self.directory, 'subdir'))
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
                 set(self.gitlsfiles()),
-                set([os.path.join('subdir', 'entry.txt'),
+                set([join('subdir', 'entry.txt'),
                      'root.txt']))
 
     def test_at_repo_subdir(self):
-        import os
-        import os.path
         self.create_git_file('root.txt')
-        os.mkdir(os.path.join(self.directory, 'subdir'))
+        os.mkdir(join(self.directory, 'subdir'))
         self.create_git_file('subdir', 'entry.txt')
         os.chdir('subdir')
         self.assertEqual(
@@ -219,7 +198,6 @@ class gitlsfiles_tests(GitTestCase):
                 set(['entry.txt']))
 
     def test_utf8_filename(self):
-        import os.path
         filename = 'héhé.html'
 
         # HFS Plus uses decomposed UTF-8
@@ -227,12 +205,11 @@ class gitlsfiles_tests(GitTestCase):
             filename = decompose(filename)
 
         self.create_git_file(filename)
-        result = self.gitlsfiles()
-        self.assertEqual(set(result),
-                         set([filename]))
+        self.assertEqual(
+                set(self.gitlsfiles()),
+                set([filename]))
 
     def test_latin1_filename(self):
-        import os.path
         if sys.version_info >= (3,):
             filename = 'héhé.html'.encode('latin-1')
         else:
@@ -243,40 +220,35 @@ class gitlsfiles_tests(GitTestCase):
             filename = hfs_quote(filename)
 
         self.create_git_file(filename)
-        result = self.gitlsfiles()
-        self.assertEqual(set(result),
-                         set([filename]))
+        self.assertEqual(
+                set(self.gitlsfiles()),
+                set([filename]))
 
     def test_directory_symlink(self):
-        import os
-        import os.path
-        os.mkdir(os.path.join(self.directory, 'subdir'))
+        os.mkdir(join(self.directory, 'subdir'))
         self.create_git_file('subdir', 'entry.txt')
-        os.mkdir(os.path.join(self.directory, 'package'))
+        os.mkdir(join(self.directory, 'package'))
         self.create_git_file('package', 'root.txt')
         os.symlink(
-                os.path.join(self.directory, 'subdir'),
-                os.path.join(self.directory, 'package', 'data'))
+                join(self.directory, 'subdir'),
+                join(self.directory, 'package', 'data'))
         os.chdir('package')
         self.assertEqual(
                 set(self.gitlsfiles()),
-                set([os.path.join('data', 'entry.txt'),
+                set([join('data', 'entry.txt'),
                      'root.txt']))
 
     def test_foreign_repo_symlink(self):
-        import os
-        import os.path
-        import shutil
-        os.mkdir(os.path.join(self.directory, 'subdir'))
+        os.mkdir(join(self.directory, 'subdir'))
         self.create_git_file('subdir', 'entry.txt')
         foreign = self.new_repo()
         try:
-            os.mkdir(os.path.join(foreign, 'package'))
+            os.mkdir(join(foreign, 'package'))
             self.create_git_file('package', 'root.txt')
             os.symlink(
-                    os.path.join(self.directory, 'subdir'),
-                    os.path.join(foreign, 'package', 'data'))
-            os.chdir(os.path.join(foreign, 'package'))
+                    join(self.directory, 'subdir'),
+                    join(foreign, 'package', 'data'))
+            os.chdir(join(foreign, 'package'))
             self.assertEqual(
                     set(self.gitlsfiles()),
                     set(['root.txt']))
