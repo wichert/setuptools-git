@@ -19,6 +19,7 @@ from setuptools_git.utils import b
 from setuptools_git.utils import fsencode
 from setuptools_git.utils import fsdecode
 from setuptools_git.utils import posix
+from setuptools_git.utils import compose
 
 
 def list_git_files(cwd):
@@ -71,7 +72,7 @@ def gitlsfiles(dirname=''):
     except (CalledProcessError, OSError):
         raise StopIteration
 
-    # Return files and directories by their OS path. Follow
+    # Return files and directories by their OS paths. Follow
     # symbolic links and include their targets if they stem
     # from the same repository.
     dirname = realpath(dirname)
@@ -88,4 +89,11 @@ def gitlsfiles(dirname=''):
             realname = fsencode(posix(realpath(filename)))
             if realname in git_files:
                 yield filename[prefix_length:]
+            elif sys.platform == 'darwin':
+                # HFS Plus filenames are decomposed UTF-8. It can
+                # however deal with fully composed UTF-8 on input,
+                # so we return such names as well.
+                realname = fsencode(compose(realpath(filename)))
+                if realname in git_files:
+                    yield filename[prefix_length:]
 
