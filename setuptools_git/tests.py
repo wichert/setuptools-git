@@ -70,9 +70,6 @@ class GitTestCase(unittest.TestCase):
         fd = open(filename, 'wt')
         fd.write('dummy\n')
         fd.close()
-        # Windows does not like byte filenames
-        if sys.platform == 'win32':
-            filename = fsdecode(filename)
         check_call(['git', 'add', filename])
         check_call(['git', 'commit', '--quiet', '-m', 'add new file'])
 
@@ -140,11 +137,12 @@ class list_git_files_tests(GitTestCase):
         if sys.platform == 'darwin':
             filename = decompose(filename)
 
-        self.create_git_file(filename)
-
         # Windows does not like byte filenames
         if sys.platform == 'win32':
-            filename = fsdecode(filename)
+            if sys.version_info >= (3,):
+                filename = filename.decode('utf-8')
+
+        self.create_git_file(filename)
 
         self.assertEqual(
                 [fn for fn in os.listdir(self.directory) if fn[0] != '.'],
@@ -164,11 +162,12 @@ class list_git_files_tests(GitTestCase):
         if sys.platform == 'darwin':
             filename = hfs_quote(filename)
 
-        self.create_git_file(filename)
-
         # Windows does not like byte filenames
         if sys.platform == 'win32':
-            filename = fsdecode(filename)
+            if sys.version_info >= (3,):
+                filename = filename.decode('latin-1')
+
+        self.create_git_file(filename)
 
         self.assertEqual(
                 [fn for fn in os.listdir(self.directory) if fn[0] != '.'],
@@ -269,6 +268,11 @@ class gitlsfiles_tests(GitTestCase):
         if sys.platform == 'darwin':
             filename = decompose(filename)
 
+        # Windows does not like byte filenames
+        if sys.platform == 'win32':
+            if sys.version_info >= (3,):
+                filename = filename.decode('utf-8')
+
         self.create_git_file(filename)
         self.assertEqual(
                 set(self.gitlsfiles()),
@@ -283,6 +287,11 @@ class gitlsfiles_tests(GitTestCase):
         # HFS Plus quotes unknown bytes
         if sys.platform == 'darwin':
             filename = hfs_quote(filename)
+
+        # Windows does not like byte filenames
+        if sys.platform == 'win32':
+            if sys.version_info >= (3,):
+                filename = filename.decode('latin-1')
 
         self.create_git_file(filename)
         self.assertEqual(
