@@ -146,7 +146,7 @@ class list_git_files_tests(GitTestCase):
 
         self.assertEqual(
                 [fn for fn in os.listdir(self.directory) if fn[0] != '.'],
-                [filename])
+                [fsdecode(filename)])
 
         self.assertEqual(
                 self.list_git_files(self.directory),
@@ -171,7 +171,7 @@ class list_git_files_tests(GitTestCase):
 
         self.assertEqual(
                 [fn for fn in os.listdir(self.directory) if fn[0] != '.'],
-                [filename])
+                [fsdecode(filename)])
 
         self.assertEqual(
                 self.list_git_files(self.directory),
