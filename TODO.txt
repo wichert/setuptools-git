@@ -10,8 +10,9 @@ TODO
 * Our only hope is to ask Git for bytestreams and apply some heuristics
   as to the encoding and composition used.
 
-* ATM, setuptools-git tries to locate files on the filesystem and returns
-  only filenames it can find. I assume this is an attempt at normalization.
+* ATM, setuptools-git returns files by their OS path, not the POSIX
+  path that is returned by Git. It also resolves symbolic links within
+  the same repository.
 
 * We might get away with passing along the bytestreams in Python 2,
   but in Python 3 we must return Unicode.
