@@ -84,7 +84,7 @@ def posix(path):
 
 
 # Windows cannot delete read-only Git objects
-def rmtree(self, path):
+def rmtree(path):
     if sys.platform == 'win32':
         def onerror(func, path, excinfo):
             os.chmod(path, stat.S_IWRITE)
