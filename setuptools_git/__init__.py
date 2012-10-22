@@ -17,6 +17,7 @@ from distutils import log
 from setuptools_git.compat import check_output
 from setuptools_git.compat import b
 from setuptools_git.compat import fsencode
+from setuptools_git.compat import fsdecode
 from setuptools_git.compat import posix
 
 
@@ -39,6 +40,9 @@ def list_git_files(cwd):
     # git_files" code in gitlsfiles to work properly.
     git_top = check_output(
         ['git', 'rev-parse', '--show-toplevel'], cwd=cwd, stderr=PIPE).strip()
+    # Windows does not like the byte cwd under Python 3
+    if sys.platform == 'win32':
+        git_top = fsdecode(git_top)
     try:
         filenames = check_output(
             ['git', 'ls-files', '-z'], cwd=git_top, stderr=PIPE)

@@ -70,6 +70,9 @@ class GitTestCase(unittest.TestCase):
         fd = open(filename, 'wt')
         fd.write('dummy\n')
         fd.close()
+        # Windows does not like byte filenames under Python 3
+        if sys.platform == 'win32':
+            filename = fsdecode(filename)
         check_call(['git', 'add', filename])
         check_call(['git', 'commit', '--quiet', '-m', 'add new file'])
 
@@ -113,7 +116,9 @@ class list_git_files_tests(GitTestCase):
 
         # NTFS expects Windows-1252 path names
         if sys.platform == 'win32':
-            filename = filename.decode('utf-8').encode('cp1252')
+            if sys.version_info < (3,):
+                # mysys-git mangles filenames in interesting ways
+                filename = filename.decode('cp1252').encode('utf-8')
 
         self.create_git_file(filename)
 
@@ -139,11 +144,11 @@ class list_git_files_tests(GitTestCase):
 
         self.assertEqual(
                 [fn for fn in os.listdir(self.directory) if fn[0] != '.'],
-                [fsdecode(filename, 'utf-8')])
+                [fsdecode(filename)])
 
         self.assertEqual(
                 self.list_git_files(self.directory),
-                set([fsencode(posix(realpath(filename)))]))
+                set([fsencode(posix(realpath(fsdecode(filename))))]))
 
     def test_latin1_filename(self):
         if sys.version_info >= (3,):
@@ -159,11 +164,11 @@ class list_git_files_tests(GitTestCase):
 
         self.assertEqual(
                 [fn for fn in os.listdir(self.directory) if fn[0] != '.'],
-                [fsdecode(filename, 'latin-1')])
+                [fsdecode(filename)])
 
         self.assertEqual(
                 self.list_git_files(self.directory),
-                set([fsencode(posix(realpath(filename)))]))
+                set([fsencode(posix(realpath(fsdecode(filename))))]))
 
     if sys.platform != 'win32':
 
