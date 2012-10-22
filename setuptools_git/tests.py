@@ -1,45 +1,16 @@
 # -*- coding: utf-8 -*-
 import sys
 import os
-import unicodedata
 import tempfile
 import unittest
 
 from os.path import realpath, join
-from setuptools_git.utils import url_quote
 from setuptools_git.utils import fsencode
 from setuptools_git.utils import fsdecode
 from setuptools_git.utils import posix
 from setuptools_git.utils import rmtree
-
-if sys.version_info >= (3,):
-    unicode = str
-
-
-# HFS Plus returns decomposed UTF-8
-def decompose(path):
-    if isinstance(path, unicode):
-        return unicodedata.normalize('NFD', path)
-    try:
-        path = path.decode('utf-8')
-        path = unicodedata.normalize('NFD', path)
-        path = path.encode('utf-8')
-    except UnicodeError:
-        pass # Not UTF-8
-    return path
-
-
-# HFS Plus quotes unknown bytes like so: %F6
-def hfs_quote(path):
-    if isinstance(path, unicode):
-        raise TypeError('bytes are required')
-    try:
-        path.decode('utf-8')
-    except UnicodeDecodeError:
-        path = url_quote(path) # Not UTF-8
-        if sys.version_info >= (3,):
-            path = path.encode('ascii')
-    return path
+from setuptools_git.utils import decompose
+from setuptools_git.utils import hfs_quote
 
 
 class GitTestCase(unittest.TestCase):

@@ -2,6 +2,7 @@ import sys
 import os
 import stat
 import shutil
+import unicodedata
 
 try:
     from subprocess import check_call
@@ -41,9 +42,10 @@ except ImportError:
         return output
 
 
-# Python 3 compatibility imports
+# Python 3 compatibility
 if sys.version_info >= (3,):
     from urllib.parse import quote as url_quote
+    unicode = str
 else:
     from urllib import quote as url_quote
 
@@ -94,5 +96,44 @@ def rmtree(path):
         shutil.rmtree(path, False)
 
 
-__all__ = ['check_call', 'check_output', 'url_quote', 'b', 'fsencode',
-           'fsdecode', 'posix', 'rmtree']
+# HFS Plus uses decomposed UTF-8
+def compose(path):
+    if isinstance(path, unicode):
+        return unicodedata.normalize('NFC', path)
+    try:
+        path = path.decode('utf-8')
+        path = unicodedata.normalize('NFC', path)
+        path = path.encode('utf-8')
+    except UnicodeError:
+        pass # Not UTF-8
+    return path
+
+
+# HFS Plus uses decomposed UTF-8
+def decompose(path):
+    if isinstance(path, unicode):
+        return unicodedata.normalize('NFD', path)
+    try:
+        path = path.decode('utf-8')
+        path = unicodedata.normalize('NFD', path)
+        path = path.encode('utf-8')
+    except UnicodeError:
+        pass # Not UTF-8
+    return path
+
+
+# HFS Plus quotes unknown bytes like so: %F6
+def hfs_quote(path):
+    if isinstance(path, unicode):
+        raise TypeError('bytes are required')
+    try:
+        path.decode('utf-8')
+    except UnicodeDecodeError:
+        path = url_quote(path) # Not UTF-8
+        if sys.version_info >= (3,):
+            path = path.encode('ascii')
+    return path
+
+
+__all__ = ['check_call', 'check_output', 'b', 'fsencode', 'fsdecode',
+           'posix', 'rmtree', 'compose', 'decompose', 'hfs_quote']
