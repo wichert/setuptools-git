@@ -70,7 +70,7 @@ class GitTestCase(unittest.TestCase):
         fd = open(filename, 'wt')
         fd.write('dummy\n')
         fd.close()
-        # Windows does not like byte filenames under Python 3
+        # Windows does not like byte filenames
         if sys.platform == 'win32':
             filename = fsdecode(filename)
         check_call(['git', 'add', filename])
@@ -117,7 +117,7 @@ class list_git_files_tests(GitTestCase):
         # NTFS expects Windows-1252 path names
         if sys.platform == 'win32':
             if sys.version_info < (3,):
-                # mysys-git mangles filenames in interesting ways
+                # But mysys-git reinterprets them as UTF-8
                 filename = filename.decode('cp1252').encode('utf-8')
 
         self.create_git_file(filename)
@@ -142,13 +142,17 @@ class list_git_files_tests(GitTestCase):
 
         self.create_git_file(filename)
 
+        # Windows does not like byte filenames
+        if sys.platform == 'win32':
+            filename = fsdecode(filename)
+
         self.assertEqual(
                 [fn for fn in os.listdir(self.directory) if fn[0] != '.'],
-                [fsdecode(filename)])
+                [filename])
 
         self.assertEqual(
                 self.list_git_files(self.directory),
-                set([fsencode(posix(realpath(fsdecode(filename))))]))
+                set([fsencode(posix(realpath(filename)))]))
 
     def test_latin1_filename(self):
         if sys.version_info >= (3,):
@@ -162,13 +166,17 @@ class list_git_files_tests(GitTestCase):
 
         self.create_git_file(filename)
 
+        # Windows does not like byte filenames
+        if sys.platform == 'win32':
+            filename = fsdecode(filename)
+
         self.assertEqual(
                 [fn for fn in os.listdir(self.directory) if fn[0] != '.'],
-                [fsdecode(filename)])
+                [filename])
 
         self.assertEqual(
                 self.list_git_files(self.directory),
-                set([fsencode(posix(realpath(fsdecode(filename))))]))
+                set([fsencode(posix(realpath(filename)))]))
 
     if sys.platform != 'win32':
 
