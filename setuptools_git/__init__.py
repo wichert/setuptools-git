@@ -76,7 +76,13 @@ def gitlsfiles(dirname=''):
     # from the same repository.
     dirname = realpath(dirname)
     prefix_length = len(dirname) + 1
-    for (root, dirs, files) in os.walk(dirname, followlinks=True):
+
+    if sys.version_info >= (2, 6):
+        walker = os.walk(dirname, followlinks=True)
+    else:
+        walker = os.walk(dirname)
+
+    for (root, dirs, files) in walker:
         for file in files:
             filename = os.path.join(root, file)
             realname = fsencode(posix(realpath(filename)))

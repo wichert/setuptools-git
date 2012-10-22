@@ -148,7 +148,7 @@ class list_git_files_tests(GitTestCase):
                 self.list_git_files(self.directory),
                 set([fsencode(posix(realpath(filename)))]))
 
-    if sys.platform != 'win32':
+    if sys.platform != 'win32' and sys.version_info >= (2, 6):
 
         def test_directory_symlink(self):
             os.mkdir(join(self.directory, 'subdir'))
@@ -269,7 +269,7 @@ class gitlsfiles_tests(GitTestCase):
                 set(self.gitlsfiles()),
                 set([fsdecode(filename)]))
 
-    if sys.platform != 'win32':
+    if sys.platform != 'win32' and sys.version_info >= (2, 6):
 
         def test_directory_symlink(self):
             os.mkdir(join(self.directory, 'subdir'))
