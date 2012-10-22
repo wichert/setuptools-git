@@ -54,22 +54,18 @@ def b(s, encoding='utf-8'):
 
 
 # Encode path to fs encoding under Python 3
-def fsencode(path, encoding=None):
+def fsencode(path):
     if sys.version_info >= (3,):
         if isinstance(path, str):
-            if encoding is None:
-                encoding = sys.getfilesystemencoding()
-            return path.encode(encoding, 'surrogateescape')
+            return path.encode(sys.getfilesystemencoding(), 'surrogateescape')
     return path
 
 
 # Decode path from fs encoding under Python 3
-def fsdecode(path, encoding=None):
+def fsdecode(path):
     if sys.version_info >= (3,):
         if not isinstance(path, str):
-            if encoding is None:
-                encoding = sys.getfilesystemencoding()
-            return path.decode(encoding, 'surrogateescape')
+            return path.decode(sys.getfilesystemencoding(), 'surrogateescape')
     return path
 
 
