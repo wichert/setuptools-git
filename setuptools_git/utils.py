@@ -1,5 +1,7 @@
 import sys
 import os
+import stat
+import shutil
 
 try:
     from subprocess import check_call
@@ -81,4 +83,16 @@ def posix(path):
     return path
 
 
-__all__ = ['check_call', 'check_output', 'url_quote', 'b', 'fsencode', 'fsdecode', 'posix']
+# Windows cannot delete read-only Git objects
+def rmtree(self, path):
+    if sys.platform == 'win32':
+        def onerror(func, path, excinfo):
+            os.chmod(path, stat.S_IWRITE)
+            func(path)
+        shutil.rmtree(path, False, onerror)
+    else:
+        shutil.rmtree(path, False)
+
+
+__all__ = ['check_call', 'check_output', 'url_quote', 'b', 'fsencode',
+           'fsdecode', 'posix', 'rmtree']

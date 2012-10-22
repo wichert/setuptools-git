@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
 import os
-import stat
-import shutil
 import unicodedata
 import tempfile
 import unittest
@@ -12,6 +10,7 @@ from setuptools_git.utils import url_quote
 from setuptools_git.utils import fsencode
 from setuptools_git.utils import fsdecode
 from setuptools_git.utils import posix
+from setuptools_git.utils import rmtree
 
 if sys.version_info >= (3,):
     unicode = str
@@ -51,14 +50,7 @@ class GitTestCase(unittest.TestCase):
 
     def tearDown(self):
         os.chdir(self.old_cwd)
-        self.rmtree(self.directory)
-
-    def rmtree(self, path):
-        # Git objects are read-only and Windows cannot delete them
-        def onerror(func, path, excinfo):
-            os.chmod(path, stat.S_IWRITE)
-            func(path)
-        shutil.rmtree(path, False, onerror)
+        rmtree(self.directory)
 
     def new_repo(self):
         from setuptools_git.utils import check_call
@@ -214,7 +206,7 @@ class list_git_files_tests(GitTestCase):
                         set(self.list_git_files(join(foreign, 'package'))),
                         set([fsencode(realpath(join('package', 'root.txt')))]))
             finally:
-                self.rmtree(foreign)
+                rmtree(foreign)
 
 
 class gitlsfiles_tests(GitTestCase):
@@ -337,5 +329,5 @@ class gitlsfiles_tests(GitTestCase):
                         set(self.gitlsfiles()),
                         set(['root.txt']))
             finally:
-                self.rmtree(foreign)
+                rmtree(foreign)
 
