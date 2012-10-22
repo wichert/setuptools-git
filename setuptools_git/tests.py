@@ -111,7 +111,15 @@ class list_git_files_tests(GitTestCase):
         if sys.platform == 'darwin':
             filename = decompose(filename)
 
+        # NTFS expects Windows-1252 path names
+        if sys.platform == 'win32':
+            filename = filename.decode('utf-8').encode('cp1252')
+
         self.create_git_file(filename)
+
+        self.assertEqual(
+                [fn for fn in os.listdir(self.directory) if fn[0] != '.'],
+                [filename])
 
         self.assertEqual(
                 self.list_git_files(self.directory),
@@ -128,6 +136,11 @@ class list_git_files_tests(GitTestCase):
             filename = decompose(filename)
 
         self.create_git_file(filename)
+
+        self.assertEqual(
+                [fn for fn in os.listdir(self.directory) if fn[0] != '.'],
+                [fsdecode(filename, 'utf-8')])
+
         self.assertEqual(
                 self.list_git_files(self.directory),
                 set([fsencode(posix(realpath(filename)))]))
@@ -143,6 +156,11 @@ class list_git_files_tests(GitTestCase):
             filename = hfs_quote(filename)
 
         self.create_git_file(filename)
+
+        self.assertEqual(
+                [fn for fn in os.listdir(self.directory) if fn[0] != '.'],
+                [fsdecode(filename, 'latin-1')])
+
         self.assertEqual(
                 self.list_git_files(self.directory),
                 set([fsencode(posix(realpath(filename)))]))

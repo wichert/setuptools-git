@@ -54,24 +54,33 @@ def b(s, encoding='utf-8'):
 
 
 # Encode path to fs encoding under Python 3
-def fsencode(path):
+def fsencode(path, encoding=None):
     if sys.version_info >= (3,):
         if isinstance(path, str):
-            return path.encode(sys.getfilesystemencoding(), 'surrogateescape')
+            if encoding is None:
+                encoding = sys.getfilesystemencoding()
+            return path.encode(encoding, 'surrogateescape')
     return path
 
 
 # Decode path from fs encoding under Python 3
-def fsdecode(path):
+def fsdecode(path, encoding=None):
     if sys.version_info >= (3,):
         if not isinstance(path, str):
-            return path.decode(sys.getfilesystemencoding(), 'surrogateescape')
+            if encoding is None:
+                encoding = sys.getfilesystemencoding()
+            return path.decode(encoding, 'surrogateescape')
     return path
 
 
 # Convert path to POSIX path on Windows
 def posix(path):
     if sys.platform == 'win32':
+        # mysys-git reinterprets filenames as UTF-8
+        if sys.version_info >= (3,):
+            path = path.encode('utf-8').decode('cp1252')
+        else:
+            path = path.decode('cp1252').encode('utf-8')
         return path.replace(os.sep, '/')
     return path
 
