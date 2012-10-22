@@ -8,10 +8,10 @@ import tempfile
 import unittest
 
 from os.path import realpath, join
-from setuptools_git.compat import url_quote
-from setuptools_git.compat import fsencode
-from setuptools_git.compat import fsdecode
-from setuptools_git.compat import posix
+from setuptools_git.utils import url_quote
+from setuptools_git.utils import fsencode
+from setuptools_git.utils import fsdecode
+from setuptools_git.utils import posix
 
 if sys.version_info >= (3,):
     unicode = str
@@ -61,7 +61,7 @@ class GitTestCase(unittest.TestCase):
         shutil.rmtree(path, False, onerror)
 
     def new_repo(self):
-        from setuptools_git.compat import check_call
+        from setuptools_git.utils import check_call
         directory = realpath(tempfile.mkdtemp())
         os.chdir(directory)
         check_call(['git', 'init', '--quiet', directory])
@@ -73,7 +73,7 @@ class GitTestCase(unittest.TestCase):
         fd.close()
 
     def create_git_file(self, *path):
-        from setuptools_git.compat import check_call
+        from setuptools_git.utils import check_call
         filename = join(*path)
         fd = open(filename, 'wt')
         fd.write('dummy\n')

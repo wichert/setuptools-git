@@ -14,11 +14,11 @@ from subprocess import CalledProcessError
 from subprocess import PIPE
 from distutils import log
 
-from setuptools_git.compat import check_output
-from setuptools_git.compat import b
-from setuptools_git.compat import fsencode
-from setuptools_git.compat import fsdecode
-from setuptools_git.compat import posix
+from setuptools_git.utils import check_output
+from setuptools_git.utils import b
+from setuptools_git.utils import fsencode
+from setuptools_git.utils import fsdecode
+from setuptools_git.utils import posix
 
 
 def list_git_files(cwd):
