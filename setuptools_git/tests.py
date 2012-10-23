@@ -99,9 +99,8 @@ class list_git_files_tests(GitTestCase):
             filename = decompose(filename)
 
         # Windows does not like byte filenames under Python 3
-        if sys.platform == 'win32':
-            if sys.version_info >= (3,):
-                filename = filename.decode('utf-8')
+        if sys.platform == 'win32' and sys.version_info >= (3,):
+            filename = filename.decode('utf-8')
 
         self.create_git_file(filename)
 
@@ -124,9 +123,8 @@ class list_git_files_tests(GitTestCase):
             filename = hfs_quote(filename)
 
         # Windows does not like byte filenames under Python 3
-        if sys.platform == 'win32':
-            if sys.version_info >= (3,):
-                filename = filename.decode('latin-1')
+        if sys.platform == 'win32' and sys.version_info >= (3,):
+            filename = filename.decode('latin-1')
 
         self.create_git_file(filename)
 
@@ -149,9 +147,8 @@ class list_git_files_tests(GitTestCase):
             filename = hfs_quote(filename)
 
         # Windows does not like byte filenames under Python 3
-        if sys.platform == 'win32':
-            if sys.version_info >= (3,):
-                filename = filename.decode('cp1252')
+        if sys.platform == 'win32' and sys.version_info >= (3,):
+            filename = filename.decode('cp1252')
 
         self.create_git_file(filename)
 
@@ -232,9 +229,8 @@ class gitlsfiles_tests(GitTestCase):
             filename = decompose(filename)
 
         # Windows does not like byte filenames under Python 3
-        if sys.platform == 'win32':
-            if sys.version_info >= (3,):
-                filename = filename.decode('utf-8')
+        if sys.platform == 'win32' and sys.version_info >= (3,):
+            filename = filename.decode('utf-8')
 
         self.create_git_file(filename)
         self.assertEqual(
@@ -252,9 +248,8 @@ class gitlsfiles_tests(GitTestCase):
             filename = hfs_quote(filename)
 
         # Windows does not like byte filenames under Python 3
-        if sys.platform == 'win32':
-            if sys.version_info >= (3,):
-                filename = filename.decode('latin-1')
+        if sys.platform == 'win32' and sys.version_info >= (3,):
+            filename = filename.decode('latin-1')
 
         self.create_git_file(filename)
         self.assertEqual(
@@ -272,9 +267,8 @@ class gitlsfiles_tests(GitTestCase):
             filename = hfs_quote(filename)
 
         # Windows does not like byte filenames under Python 3
-        if sys.platform == 'win32':
-            if sys.version_info >= (3,):
-                filename = filename.decode('cp1252')
+        if sys.platform == 'win32' and sys.version_info >= (3,):
+            filename = filename.decode('cp1252')
 
         self.create_git_file(filename)
         self.assertEqual(
