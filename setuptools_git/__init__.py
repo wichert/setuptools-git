@@ -12,6 +12,25 @@ from subprocess import PIPE
 from setuptools_git.utils import check_output
 from setuptools_git.utils import b
 from setuptools_git.utils import fsdecode
+from setuptools_git.utils import compose
+
+
+def windecode(path):
+    # We receive wonky filenames on Windows, probably because of
+    # mysys-git's Unicode support.
+    preferredencoding = locale.getpreferredencoding()
+    if sys.version_info >= (3,):
+        try:
+            path = compose(path.decode('utf-8'))
+        except UnicodeDecodeError:
+            path = path.decode(preferredencoding)
+    else:
+        try:
+            path = compose(path.decode('utf-8'))\
+                .encode(preferredencoding)
+        except UnicodeError:
+            pass # Already in preferred encoding (hopefully)
+    return path
 
 
 def list_git_files(cwd):
@@ -34,12 +53,7 @@ def list_git_files(cwd):
     for filename in filenames.split(b('\x00')):
         if filename:
             if sys.platform == 'win32':
-                # msys-git on Windows returns UTF-8
-                if sys.version_info >= (3,):
-                    yield filename.decode('utf-8')
-                else:
-                    preferredencoding = locale.getpreferredencoding()
-                    yield filename.decode('utf-8').encode(preferredencoding)
+                yield windecode(filename)
             else:
                 yield fsdecode(filename)
 
@@ -49,6 +63,6 @@ def gitlsfiles(dirname=''):
         for filename in list_git_files(dirname or None):
             yield filename
     except (CalledProcessError, OSError):
-        # setuptools mandates to fail silently
+        # Setuptools mandates we fail silently
         raise StopIteration
 
