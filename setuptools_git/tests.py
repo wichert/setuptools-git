@@ -184,96 +184,11 @@ class gitlsfiles_tests(GitTestCase):
 
     def test_specify_full_path(self):
         self.create_git_file('root.txt')
-        os.chdir(self.old_cwd)
-        self.assertEqual(
-                set(self.gitlsfiles(self.directory)),
-                set(['root.txt']))
-
-    def test_at_repo_root_with_subdir(self):
-        self.create_git_file('root.txt')
         os.mkdir(join(self.directory, 'subdir'))
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
-                set(self.gitlsfiles()),
-                set(['root.txt', 'subdir/entry.txt']))
-
-    def test_at_repo_subdir(self):
-        self.create_git_file('root.txt')
-        os.mkdir(join(self.directory, 'subdir'))
-        self.create_git_file('subdir', 'entry.txt')
-        os.chdir('subdir')
-        self.assertEqual(
-                set(self.gitlsfiles()),
+                set(self.gitlsfiles(join(self.directory, 'subdir'))),
                 set(['entry.txt']))
-
-    def test_nonascii_filename(self):
-        filename = 'héhé.html'
-
-        # HFS Plus uses decomposed UTF-8
-        if sys.platform == 'darwin':
-            filename = decompose(filename)
-
-        self.create_git_file(filename)
-        self.assertEqual(
-                set(self.gitlsfiles()),
-                set([filename]))
-
-    def test_utf8_filename(self):
-        if sys.version_info >= (3,):
-            filename = 'héhé.html'.encode('utf-8')
-        else:
-            filename = 'héhé.html'
-
-        # HFS Plus uses decomposed UTF-8
-        if sys.platform == 'darwin':
-            filename = decompose(filename)
-
-        # Windows does not like byte filenames under Python 3
-        if sys.platform == 'win32' and sys.version_info >= (3,):
-            filename = filename.decode('utf-8')
-
-        self.create_git_file(filename)
-        self.assertEqual(
-                set(self.gitlsfiles()),
-                set([fsdecode(filename)]))
-
-    def test_latin1_filename(self):
-        if sys.version_info >= (3,):
-            filename = 'héhé.html'.encode('latin-1')
-        else:
-            filename = 'h\xe9h\xe9.html'
-
-        # HFS Plus quotes unknown bytes
-        if sys.platform == 'darwin':
-            filename = hfs_quote(filename)
-
-        # Windows does not like byte filenames under Python 3
-        if sys.platform == 'win32' and sys.version_info >= (3,):
-            filename = filename.decode('latin-1')
-
-        self.create_git_file(filename)
-        self.assertEqual(
-                set(self.gitlsfiles()),
-                set([fsdecode(filename)]))
-
-    def test_cp1252_filename(self):
-        if sys.version_info >= (3,):
-            filename = 'héhé.html'.encode('cp1252')
-        else:
-            filename = 'héhé.html'.decode('utf-8').encode('cp1252')
-
-        # HFS Plus quotes unknown bytes
-        if sys.platform == 'darwin':
-            filename = hfs_quote(filename)
-
-        # Windows does not like byte filenames under Python 3
-        if sys.platform == 'win32' and sys.version_info >= (3,):
-            filename = filename.decode('cp1252')
-
-        self.create_git_file(filename)
-        self.assertEqual(
-                set(self.gitlsfiles()),
-                set([fsdecode(filename)]))
 
     def test_empty_repo(self):
         self.assertEqual(
