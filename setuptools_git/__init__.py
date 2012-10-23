@@ -84,6 +84,9 @@ def gitlsfiles(dirname=''):
         walker = os.walk(dirname)
 
     for (root, dirs, files) in walker:
+        # Don't walk into the repository
+        if '.git' in dirs:
+            dirs.remove('.git')
         for file in files:
             filename = os.path.join(root, file)
             realname = fsencode(posix(realpath(filename)))
