@@ -76,11 +76,6 @@ def fsdecode(path):
 # Convert path to POSIX path on Windows
 def posix(path):
     if sys.platform == 'win32':
-        # mysys-git reinterprets filenames as UTF-8
-        if sys.version_info >= (3,):
-            path = path.encode('utf-8').decode('cp1252')
-        else:
-            path = path.decode('cp1252').encode('utf-8')
         return path.replace(os.sep, '/')
     return path
 

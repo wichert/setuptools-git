@@ -3,6 +3,8 @@
 """
 A hook into setuptools for Git.
 """
+import sys
+import locale
 
 from subprocess import CalledProcessError
 from subprocess import PIPE
@@ -31,18 +33,20 @@ def list_git_files(cwd):
 
     for filename in filenames.split(b('\x00')):
         if filename:
-            yield fsdecode(filename)
+            if sys.platform == 'win32':
+                # msys-git on Windows returns UTF-8
+                if sys.version_info >= (3,):
+                    yield filename.decode('utf-8')
+                else:
+                    preferredencoding = locale.getpreferredencoding()
+                    yield filename.decode('utf-8').encode(preferredencoding)
+            else:
+                yield fsdecode(filename)
 
 
 def gitlsfiles(dirname=''):
-    if dirname:
-        cwd = dirname
-    else:
-        cwd = None
-        dirname = '.'
-
     try:
-        for filename in list_git_files(cwd):
+        for filename in list_git_files(dirname or None):
             yield filename
     except (CalledProcessError, OSError):
         # setuptools mandates to fail silently

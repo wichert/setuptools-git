@@ -6,7 +6,6 @@ import unittest
 
 from os.path import realpath, join
 from setuptools_git.utils import fsdecode
-from setuptools_git.utils import posix
 from setuptools_git.utils import rmtree
 from setuptools_git.utils import decompose
 from setuptools_git.utils import hfs_quote
@@ -54,7 +53,7 @@ class list_git_files_tests(GitTestCase):
         self.create_git_file('root.txt')
         self.assertEqual(
                 set(self.list_git_files(self.directory)),
-                set([posix('root.txt')]))
+                set(['root.txt']))
 
     def test_at_repo_root_with_subdir(self):
         self.create_git_file('root.txt')
@@ -62,7 +61,7 @@ class list_git_files_tests(GitTestCase):
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
                 set(self.list_git_files(self.directory)),
-                set([posix('root.txt'), posix(join('subdir', 'entry.txt'))]))
+                set(['root.txt', 'subdir/entry.txt']))
 
     def test_at_repo_subdir(self):
         self.create_git_file('root.txt')
@@ -70,7 +69,7 @@ class list_git_files_tests(GitTestCase):
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
                 set(self.list_git_files(join(self.directory, 'subdir'))),
-                set([posix('entry.txt')]))
+                set(['entry.txt']))
 
     def test_nonascii_filename(self):
         filename = 'héhé.html'
@@ -78,12 +77,6 @@ class list_git_files_tests(GitTestCase):
         # HFS Plus uses decomposed UTF-8
         if sys.platform == 'darwin':
             filename = decompose(filename)
-
-        # NTFS expects Windows-1252 path names
-        if sys.platform == 'win32':
-            if sys.version_info < (3,):
-                # But mysys-git reinterprets them as UTF-8
-                filename = filename.decode('cp1252').encode('utf-8')
 
         self.create_git_file(filename)
 
@@ -93,7 +86,7 @@ class list_git_files_tests(GitTestCase):
 
         self.assertEqual(
                 set(self.list_git_files(self.directory)),
-                set([posix(filename)]))
+                set([filename]))
 
     def test_utf8_filename(self):
         if sys.version_info >= (3,):
@@ -105,7 +98,7 @@ class list_git_files_tests(GitTestCase):
         if sys.platform == 'darwin':
             filename = decompose(filename)
 
-        # Windows does not like byte filenames
+        # Windows does not like byte filenames under Python 3
         if sys.platform == 'win32':
             if sys.version_info >= (3,):
                 filename = filename.decode('utf-8')
@@ -118,7 +111,7 @@ class list_git_files_tests(GitTestCase):
 
         self.assertEqual(
                 set(self.list_git_files(self.directory)),
-                set([posix(fsdecode(filename))]))
+                set([fsdecode(filename)]))
 
     def test_latin1_filename(self):
         if sys.version_info >= (3,):
@@ -130,7 +123,7 @@ class list_git_files_tests(GitTestCase):
         if sys.platform == 'darwin':
             filename = hfs_quote(filename)
 
-        # Windows does not like byte filenames
+        # Windows does not like byte filenames under Python 3
         if sys.platform == 'win32':
             if sys.version_info >= (3,):
                 filename = filename.decode('latin-1')
@@ -143,7 +136,32 @@ class list_git_files_tests(GitTestCase):
 
         self.assertEqual(
                 set(self.list_git_files(self.directory)),
-                set([posix(fsdecode(filename))]))
+                set([fsdecode(filename)]))
+
+    def test_cp1252_filename(self):
+        if sys.version_info >= (3,):
+            filename = 'héhé.html'.encode('cp1252')
+        else:
+            filename = 'héhé.html'.decode('utf-8').encode('cp1252')
+
+        # HFS Plus quotes unknown bytes
+        if sys.platform == 'darwin':
+            filename = hfs_quote(filename)
+
+        # Windows does not like byte filenames under Python 3
+        if sys.platform == 'win32':
+            if sys.version_info >= (3,):
+                filename = filename.decode('cp1252')
+
+        self.create_git_file(filename)
+
+        self.assertEqual(
+                [fn for fn in os.listdir(self.directory) if fn[0] != '.'],
+                [fsdecode(filename)])
+
+        self.assertEqual(
+                set(self.list_git_files(self.directory)),
+                set([fsdecode(filename)]))
 
     def test_empty_repo(self):
         self.assertEqual(
@@ -180,7 +198,7 @@ class gitlsfiles_tests(GitTestCase):
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
                 set(self.gitlsfiles()),
-                set(['root.txt', posix(join('subdir', 'entry.txt'))]))
+                set(['root.txt', 'subdir/entry.txt']))
 
     def test_at_repo_subdir(self):
         self.create_git_file('root.txt')
@@ -213,7 +231,7 @@ class gitlsfiles_tests(GitTestCase):
         if sys.platform == 'darwin':
             filename = decompose(filename)
 
-        # Windows does not like byte filenames
+        # Windows does not like byte filenames under Python 3
         if sys.platform == 'win32':
             if sys.version_info >= (3,):
                 filename = filename.decode('utf-8')
@@ -233,10 +251,30 @@ class gitlsfiles_tests(GitTestCase):
         if sys.platform == 'darwin':
             filename = hfs_quote(filename)
 
-        # Windows does not like byte filenames
+        # Windows does not like byte filenames under Python 3
         if sys.platform == 'win32':
             if sys.version_info >= (3,):
                 filename = filename.decode('latin-1')
+
+        self.create_git_file(filename)
+        self.assertEqual(
+                set(self.gitlsfiles()),
+                set([fsdecode(filename)]))
+
+    def test_cp1252_filename(self):
+        if sys.version_info >= (3,):
+            filename = 'héhé.html'.encode('cp1252')
+        else:
+            filename = 'héhé.html'.decode('utf-8').encode('cp1252')
+
+        # HFS Plus quotes unknown bytes
+        if sys.platform == 'darwin':
+            filename = hfs_quote(filename)
+
+        # Windows does not like byte filenames under Python 3
+        if sys.platform == 'win32':
+            if sys.version_info >= (3,):
+                filename = filename.decode('cp1252')
 
         self.create_git_file(filename)
         self.assertEqual(
