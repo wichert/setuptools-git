@@ -1,7 +1,7 @@
 import sys
 
 try:
-    from setuptools import setup
+    from setuptools import setup, find_packages
 except ImportError:
     try:
         from ez_setup import use_setuptools
@@ -10,7 +10,7 @@ except ImportError:
         print("try: wget http://peak.telecommunity.com/dist/ez_setup.py")
         sys.exit(1)
     use_setuptools()
-    from setuptools import setup
+    from setuptools import setup, find_packages
 
 
 version = '1.0b1dev'
@@ -25,6 +25,7 @@ setup(
     description="Setuptools revision control system plugin for Git",
     long_description=open('README.rst').read(),
     license='BSD',
+    packages=find_packages(),
     test_suite='setuptools_git',
     classifiers=[
         "Topic :: Software Development :: Version Control",
