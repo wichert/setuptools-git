@@ -43,16 +43,16 @@ class GitTestCase(unittest.TestCase):
         check_call(['git', 'commit', '--quiet', '-m', 'add new file'])
 
 
-class list_git_files_tests(GitTestCase):
+class gitlsfiles_tests(GitTestCase):
 
-    def list_git_files(self, *a, **kw):
-        from setuptools_git import list_git_files
-        return list_git_files(*a, **kw)
+    def gitlsfiles(self, *a, **kw):
+        from setuptools_git import gitlsfiles
+        return gitlsfiles(*a, **kw)
 
     def test_at_repo_root(self):
         self.create_git_file('root.txt')
         self.assertEqual(
-                set(self.list_git_files(self.directory)),
+                set(self.gitlsfiles(self.directory)),
                 set(['root.txt']))
 
     def test_at_repo_root_with_subdir(self):
@@ -60,7 +60,7 @@ class list_git_files_tests(GitTestCase):
         os.mkdir(join(self.directory, 'subdir'))
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
-                set(self.list_git_files(self.directory)),
+                set(self.gitlsfiles(self.directory)),
                 set(['root.txt', 'subdir/entry.txt']))
 
     def test_at_repo_subdir(self):
@@ -68,7 +68,7 @@ class list_git_files_tests(GitTestCase):
         os.mkdir(join(self.directory, 'subdir'))
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
-                set(self.list_git_files(join(self.directory, 'subdir'))),
+                set(self.gitlsfiles(join(self.directory, 'subdir'))),
                 set(['entry.txt']))
 
     def test_nonascii_filename(self):
@@ -85,7 +85,7 @@ class list_git_files_tests(GitTestCase):
                 [filename])
 
         self.assertEqual(
-                set(self.list_git_files(self.directory)),
+                set(self.gitlsfiles(self.directory)),
                 set([filename]))
 
     def test_utf8_filename(self):
@@ -109,7 +109,7 @@ class list_git_files_tests(GitTestCase):
                 [fsdecode(filename)])
 
         self.assertEqual(
-                set(self.list_git_files(self.directory)),
+                set(self.gitlsfiles(self.directory)),
                 set([fsdecode(filename)]))
 
     def test_latin1_filename(self):
@@ -133,7 +133,7 @@ class list_git_files_tests(GitTestCase):
                 [fsdecode(filename)])
 
         self.assertEqual(
-                set(self.list_git_files(self.directory)),
+                set(self.gitlsfiles(self.directory)),
                 set([fsdecode(filename)]))
 
     def test_cp1252_filename(self):
@@ -157,7 +157,7 @@ class list_git_files_tests(GitTestCase):
                 [fsdecode(filename)])
 
         self.assertEqual(
-                set(self.list_git_files(self.directory)),
+                set(self.gitlsfiles(self.directory)),
                 set([fsdecode(filename)]))
 
     def test_empty_repo(self):
@@ -166,15 +166,8 @@ class list_git_files_tests(GitTestCase):
                 [])
 
         self.assertEqual(
-                set(self.list_git_files(self.directory)),
+                set(self.gitlsfiles(self.directory)),
                 set([]))
-
-
-class gitlsfiles_tests(GitTestCase):
-
-    def gitlsfiles(self, *a, **kw):
-        from setuptools_git import gitlsfiles
-        return gitlsfiles(*a, **kw)
 
     def test_empty_dirname(self):
         self.create_git_file('root.txt')
@@ -182,12 +175,13 @@ class gitlsfiles_tests(GitTestCase):
                 set(self.gitlsfiles()),
                 set(['root.txt']))
 
-    def test_specify_full_path(self):
+    def test_empty_dirname_in_subdir(self):
         self.create_git_file('root.txt')
         os.mkdir(join(self.directory, 'subdir'))
         self.create_git_file('subdir', 'entry.txt')
+        os.chdir(join(self.directory, 'subdir'))
         self.assertEqual(
-                set(self.gitlsfiles(join(self.directory, 'subdir'))),
+                set(self.gitlsfiles()),
                 set(['entry.txt']))
 
     def test_empty_repo(self):
@@ -199,14 +193,15 @@ class gitlsfiles_tests(GitTestCase):
         import setuptools_git
         from subprocess import CalledProcessError
 
-        def do_raise(*ignored):
+        def do_raise(*args, **kw):
             raise CalledProcessError(1, 'git')
 
-        saved = setuptools_git.list_git_files
-        setuptools_git.list_git_files = do_raise
+        self.create_git_file('root.txt')
+        saved = setuptools_git.check_output
+        setuptools_git.check_output = do_raise
         try:
             for filename in self.gitlsfiles():
                 self.fail('unexpected results')
         finally:
-            setuptools_git.list_git_files = saved
+            setuptools_git.check_output = saved
 

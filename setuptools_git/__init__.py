@@ -33,7 +33,7 @@ def windecode(path):
     return path
 
 
-def list_git_files(cwd):
+def gitlsfiles(dirname=''):
     # NB: passing the "-z" option to "git ls-files" below returns the
     # output as a blob of null-terminated filenames without
     # canonicalization or use of "-quoting.
@@ -47,8 +47,12 @@ def list_git_files(cwd):
     #'"pyramid/tests/fixtures/static/h\\303\\251h\\303\\251.html"'
     #
     # for each file
-    filenames = check_output(
-        ['git', 'ls-files', '-z'], cwd=cwd, stderr=PIPE)
+    try:
+        filenames = check_output(
+            ['git', 'ls-files', '-z'], cwd=dirname or None, stderr=PIPE)
+    except (CalledProcessError, OSError):
+        # Setuptools mandates we fail silently
+        raise StopIteration
 
     for filename in filenames.split(b('\x00')):
         if filename:
@@ -56,13 +60,4 @@ def list_git_files(cwd):
                 yield windecode(filename)
             else:
                 yield fsdecode(filename)
-
-
-def gitlsfiles(dirname=''):
-    try:
-        for filename in list_git_files(dirname or None):
-            yield filename
-    except (CalledProcessError, OSError):
-        # Setuptools mandates we fail silently
-        raise StopIteration
 
