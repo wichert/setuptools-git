@@ -5,9 +5,7 @@ import tempfile
 import unittest
 
 from os.path import realpath, join
-from setuptools_git.utils import fsencode
 from setuptools_git.utils import fsdecode
-from setuptools_git.utils import posix
 from setuptools_git.utils import rmtree
 from setuptools_git.utils import decompose
 from setuptools_git.utils import hfs_quote
@@ -45,156 +43,14 @@ class GitTestCase(unittest.TestCase):
         check_call(['git', 'commit', '--quiet', '-m', 'add new file'])
 
 
-class list_git_files_tests(GitTestCase):
-
-    def list_git_files(self, *a, **kw):
-        from setuptools_git import list_git_files
-        return list_git_files(*a, **kw)
-
-    def test_at_repo_root(self):
-        self.create_git_file('root.txt')
-        self.assertEqual(
-                self.list_git_files(self.directory),
-                set([fsencode(posix(realpath('root.txt')))]))
-
-    def test_at_repo_root_with_subdir(self):
-        self.create_git_file('root.txt')
-        os.mkdir(join(self.directory, 'subdir'))
-        self.create_git_file('subdir', 'entry.txt')
-        self.assertEqual(
-                self.list_git_files(self.directory),
-                set([fsencode(posix(realpath(join('subdir', 'entry.txt')))),
-                     fsencode(posix(realpath('root.txt')))]))
-
-    def test_at_repo_subdir(self):
-        self.create_git_file('root.txt')
-        os.mkdir(join(self.directory, 'subdir'))
-        self.create_git_file('subdir', 'entry.txt')
-        self.assertEqual(
-                self.list_git_files(join(self.directory, 'subdir')),
-                set([fsencode(posix(realpath(join('subdir', 'entry.txt')))),
-                     fsencode(posix(realpath('root.txt')))]))
-
-    def test_nonascii_filename(self):
-        filename = 'héhé.html'
-
-        # HFS Plus uses decomposed UTF-8
-        if sys.platform == 'darwin':
-            filename = decompose(filename)
-
-        # NTFS expects Windows-1252 path names
-        if sys.platform == 'win32':
-            if sys.version_info < (3,):
-                # But mysys-git reinterprets them as UTF-8
-                filename = filename.decode('cp1252').encode('utf-8')
-
-        self.create_git_file(filename)
-
-        self.assertEqual(
-                [fn for fn in os.listdir(self.directory) if fn[0] != '.'],
-                [filename])
-
-        self.assertEqual(
-                self.list_git_files(self.directory),
-                set([fsencode(posix(realpath(filename)))]))
-
-    def test_utf8_filename(self):
-        if sys.version_info >= (3,):
-            filename = 'héhé.html'.encode('utf-8')
-        else:
-            filename = 'héhé.html'
-
-        # HFS Plus uses decomposed UTF-8
-        if sys.platform == 'darwin':
-            filename = decompose(filename)
-
-        # Windows does not like byte filenames
-        if sys.platform == 'win32':
-            if sys.version_info >= (3,):
-                filename = filename.decode('utf-8')
-
-        self.create_git_file(filename)
-
-        self.assertEqual(
-                [fn for fn in os.listdir(self.directory) if fn[0] != '.'],
-                [fsdecode(filename)])
-
-        self.assertEqual(
-                self.list_git_files(self.directory),
-                set([fsencode(posix(realpath(filename)))]))
-
-    def test_latin1_filename(self):
-        if sys.version_info >= (3,):
-            filename = 'héhé.html'.encode('latin-1')
-        else:
-            filename = 'h\xe9h\xe9.html'
-
-        # HFS Plus quotes unknown bytes
-        if sys.platform == 'darwin':
-            filename = hfs_quote(filename)
-
-        # Windows does not like byte filenames
-        if sys.platform == 'win32':
-            if sys.version_info >= (3,):
-                filename = filename.decode('latin-1')
-
-        self.create_git_file(filename)
-
-        self.assertEqual(
-                [fn for fn in os.listdir(self.directory) if fn[0] != '.'],
-                [fsdecode(filename)])
-
-        self.assertEqual(
-                self.list_git_files(self.directory),
-                set([fsencode(posix(realpath(filename)))]))
-
-    if sys.platform != 'win32' and sys.version_info >= (2, 6):
-
-        def test_directory_symlink(self):
-            os.mkdir(join(self.directory, 'subdir'))
-            self.create_git_file('subdir', 'entry.txt')
-            os.mkdir(join(self.directory, 'package'))
-            self.create_git_file('package', 'root.txt')
-            os.symlink(
-                    join(self.directory, 'subdir'),
-                    join(self.directory, 'package', 'data'))
-            self.assertEqual(
-                    set(self.list_git_files(join(self.directory, 'package'))),
-                    set([fsencode(realpath(join('subdir', 'entry.txt'))),
-                         fsencode(realpath(join('package', 'root.txt')))]))
-
-        def test_foreign_repo_symlink(self):
-            os.mkdir(join(self.directory, 'subdir'))
-            self.create_git_file('subdir', 'entry.txt')
-            foreign = self.new_repo()
-            try:
-                os.mkdir(join(foreign, 'package'))
-                self.create_git_file('package', 'root.txt')
-                os.symlink(
-                        join(self.directory, 'subdir'),
-                        join(foreign, 'package', 'data'))
-                self.assertEqual(
-                        set(self.list_git_files(join(foreign, 'package'))),
-                        set([fsencode(realpath(join('package', 'root.txt')))]))
-            finally:
-                rmtree(foreign)
-
-
 class gitlsfiles_tests(GitTestCase):
 
     def gitlsfiles(self, *a, **kw):
         from setuptools_git import gitlsfiles
         return gitlsfiles(*a, **kw)
 
-    def test_empty_dirname(self):
+    def test_at_repo_root(self):
         self.create_git_file('root.txt')
-        self.assertEqual(
-                set(self.gitlsfiles()),
-                set(['root.txt']))
-
-    def test_specify_full_path(self):
-        self.create_git_file('root.txt')
-        os.chdir(self.old_cwd)
         self.assertEqual(
                 set(self.gitlsfiles(self.directory)),
                 set(['root.txt']))
@@ -204,17 +60,15 @@ class gitlsfiles_tests(GitTestCase):
         os.mkdir(join(self.directory, 'subdir'))
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
-                set(self.gitlsfiles()),
-                set([join('subdir', 'entry.txt'),
-                     'root.txt']))
+                set(self.gitlsfiles(self.directory)),
+                set(['root.txt', 'subdir/entry.txt']))
 
     def test_at_repo_subdir(self):
         self.create_git_file('root.txt')
         os.mkdir(join(self.directory, 'subdir'))
         self.create_git_file('subdir', 'entry.txt')
-        os.chdir('subdir')
         self.assertEqual(
-                set(self.gitlsfiles()),
+                set(self.gitlsfiles(join(self.directory, 'subdir'))),
                 set(['entry.txt']))
 
     def test_nonascii_filename(self):
@@ -225,8 +79,13 @@ class gitlsfiles_tests(GitTestCase):
             filename = decompose(filename)
 
         self.create_git_file(filename)
+
         self.assertEqual(
-                set(self.gitlsfiles()),
+                [fn for fn in os.listdir(self.directory) if fn[0] != '.'],
+                [filename])
+
+        self.assertEqual(
+                set(self.gitlsfiles(self.directory)),
                 set([filename]))
 
     def test_utf8_filename(self):
@@ -239,14 +98,18 @@ class gitlsfiles_tests(GitTestCase):
         if sys.platform == 'darwin':
             filename = decompose(filename)
 
-        # Windows does not like byte filenames
-        if sys.platform == 'win32':
-            if sys.version_info >= (3,):
-                filename = filename.decode('utf-8')
+        # Windows does not like byte filenames under Python 3
+        if sys.platform == 'win32' and sys.version_info >= (3,):
+            filename = filename.decode('utf-8')
 
         self.create_git_file(filename)
+
         self.assertEqual(
-                set(self.gitlsfiles()),
+                [fn for fn in os.listdir(self.directory) if fn[0] != '.'],
+                [fsdecode(filename)])
+
+        self.assertEqual(
+                set(self.gitlsfiles(self.directory)),
                 set([fsdecode(filename)]))
 
     def test_latin1_filename(self):
@@ -259,46 +122,57 @@ class gitlsfiles_tests(GitTestCase):
         if sys.platform == 'darwin':
             filename = hfs_quote(filename)
 
-        # Windows does not like byte filenames
-        if sys.platform == 'win32':
-            if sys.version_info >= (3,):
-                filename = filename.decode('latin-1')
+        # Windows does not like byte filenames under Python 3
+        if sys.platform == 'win32' and sys.version_info >= (3,):
+            filename = filename.decode('latin-1')
 
         self.create_git_file(filename)
+
         self.assertEqual(
-                set(self.gitlsfiles()),
+                [fn for fn in os.listdir(self.directory) if fn[0] != '.'],
+                [fsdecode(filename)])
+
+        self.assertEqual(
+                set(self.gitlsfiles(self.directory)),
                 set([fsdecode(filename)]))
 
-    if sys.platform != 'win32' and sys.version_info >= (2, 6):
+    def test_empty_repo(self):
+        self.assertEqual(
+                [fn for fn in os.listdir(self.directory) if fn[0] != '.'],
+                [])
 
-        def test_directory_symlink(self):
-            os.mkdir(join(self.directory, 'subdir'))
-            self.create_git_file('subdir', 'entry.txt')
-            os.mkdir(join(self.directory, 'package'))
-            self.create_git_file('package', 'root.txt')
-            os.symlink(
-                    join(self.directory, 'subdir'),
-                    join(self.directory, 'package', 'data'))
-            os.chdir('package')
-            self.assertEqual(
-                    set(self.gitlsfiles()),
-                    set([join('data', 'entry.txt'),
-                         'root.txt']))
+        self.assertEqual(
+                set(self.gitlsfiles(self.directory)),
+                set([]))
 
-        def test_foreign_repo_symlink(self):
-            os.mkdir(join(self.directory, 'subdir'))
-            self.create_git_file('subdir', 'entry.txt')
-            foreign = self.new_repo()
-            try:
-                os.mkdir(join(foreign, 'package'))
-                self.create_git_file('package', 'root.txt')
-                os.symlink(
-                        join(self.directory, 'subdir'),
-                        join(foreign, 'package', 'data'))
-                os.chdir(join(foreign, 'package'))
-                self.assertEqual(
-                        set(self.gitlsfiles()),
-                        set(['root.txt']))
-            finally:
-                rmtree(foreign)
+    def test_empty_dirname(self):
+        self.create_git_file('root.txt')
+        self.assertEqual(
+                set(self.gitlsfiles()),
+                set(['root.txt']))
+
+    def test_empty_dirname_in_subdir(self):
+        self.create_git_file('root.txt')
+        os.mkdir(join(self.directory, 'subdir'))
+        self.create_git_file('subdir', 'entry.txt')
+        os.chdir(join(self.directory, 'subdir'))
+        self.assertEqual(
+                set(self.gitlsfiles()),
+                set(['entry.txt']))
+
+    def test_git_error(self):
+        import setuptools_git
+        from subprocess import CalledProcessError
+
+        def do_raise(*args, **kw):
+            raise CalledProcessError(1, 'git')
+
+        self.create_git_file('root.txt')
+        saved = setuptools_git.check_output
+        setuptools_git.check_output = do_raise
+        try:
+            for filename in self.gitlsfiles():
+                self.fail('unexpected results')
+        finally:
+            setuptools_git.check_output = saved
 
