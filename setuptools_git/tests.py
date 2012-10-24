@@ -160,11 +160,6 @@ class gitlsfiles_tests(GitTestCase):
                 set(self.gitlsfiles()),
                 set(['entry.txt']))
 
-    def test_empty_repo(self):
-        self.assertEqual(
-                set(self.gitlsfiles()),
-                set([]))
-
     def test_git_error(self):
         import setuptools_git
         from subprocess import CalledProcessError
