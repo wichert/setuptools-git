@@ -136,30 +136,6 @@ class gitlsfiles_tests(GitTestCase):
                 set(self.gitlsfiles(self.directory)),
                 set([fsdecode(filename)]))
 
-    def test_cp1252_filename(self):
-        if sys.version_info >= (3,):
-            filename = 'héhé.html'.encode('cp1252')
-        else:
-            filename = 'héhé.html'.decode('utf-8').encode('cp1252')
-
-        # HFS Plus quotes unknown bytes
-        if sys.platform == 'darwin':
-            filename = hfs_quote(filename)
-
-        # Windows does not like byte filenames under Python 3
-        if sys.platform == 'win32' and sys.version_info >= (3,):
-            filename = filename.decode('cp1252')
-
-        self.create_git_file(filename)
-
-        self.assertEqual(
-                [fn for fn in os.listdir(self.directory) if fn[0] != '.'],
-                [fsdecode(filename)])
-
-        self.assertEqual(
-                set(self.gitlsfiles(self.directory)),
-                set([fsdecode(filename)]))
-
     def test_empty_repo(self):
         self.assertEqual(
                 [fn for fn in os.listdir(self.directory) if fn[0] != '.'],
