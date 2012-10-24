@@ -16,8 +16,8 @@ from setuptools_git.utils import compose
 
 
 def windecode(path):
-    # We receive wonky filenames on Windows, probably because of
-    # mysys-git's Unicode support.
+    # We receive wonky filenames on Windows, probably because of what
+    # mysys-git calls Unicode support.
     preferredencoding = locale.getpreferredencoding()
     if sys.version_info >= (3,):
         try:
@@ -26,8 +26,7 @@ def windecode(path):
             path = path.decode(preferredencoding)
     else:
         try:
-            path = compose(path.decode('utf-8'))\
-                .encode(preferredencoding)
+            path = compose(path.decode('utf-8')).encode(preferredencoding)
         except UnicodeError:
             pass # Already in preferred encoding (hopefully)
     return path

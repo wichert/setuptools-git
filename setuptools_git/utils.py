@@ -4,6 +4,13 @@ import stat
 import shutil
 import unicodedata
 
+if sys.version_info >= (3,):
+    from urllib.parse import quote as url_quote
+    unicode = str
+else:
+    from urllib import quote as url_quote
+
+
 try:
     from subprocess import check_call
 except ImportError:
@@ -40,14 +47,6 @@ except ImportError:
                 cmd = popenargs[0]
             raise CalledProcessError(retcode, cmd)
         return output
-
-
-# Python 3 compatibility
-if sys.version_info >= (3,):
-    from urllib.parse import quote as url_quote
-    unicode = str
-else:
-    from urllib import quote as url_quote
 
 
 # Fake byte literals for Python <= 2.5
