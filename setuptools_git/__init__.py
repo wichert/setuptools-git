@@ -21,8 +21,8 @@ from setuptools_git.utils import hfs_quote
 
 
 def windecode(path):
-    # We receive the raw bytes from Git and have to decode by hand.
-    # Msysgit returns UTF-8 encoded bytes except when it doesn't.
+    # We receive the raw bytes from Git and must decode by hand
+    # (msysgit returns UTF-8 encoded bytes except when it doesn't)
     preferredencoding = locale.getpreferredencoding()
     if sys.version_info >= (3,):
         try:
@@ -37,32 +37,22 @@ def windecode(path):
     return path
 
 
-def decode(path):
-    if sys.platform == 'win32':
-        return windecode(path)
-    return compose(fsdecode(path))
-
-
-def quote(path):
-    if sys.platform == 'darwin':
-        return hfs_quote(path)
-    return path
-
-
 def gitlsfiles(dirname=''):
-    # NB: passing the "-z" option to "git ls-files" below returns the
-    # output as a blob of null-terminated filenames without
-    # canonicalization or use of "-quoting.
+    # NB: Passing the '-z' option to 'git ls-files' below returns the
+    # output as a blob of null-terminated filenames without canonical-
+    # ization or use of double-quoting.
     #
     # So we'll get back e.g.:
     #
-    #'pyramid/tests/fixtures/static/h\xc3\xa9h\xc3\xa9.html'
+    # 'pyramid/tests/fixtures/static/h\xc3\xa9h\xc3\xa9.html'
     #
     # instead of:
     #
-    #'"pyramid/tests/fixtures/static/h\\303\\251h\\303\\251.html"'
+    # '"pyramid/tests/fixtures/static/h\\303\\251h\\303\\251.html"'
     #
-    # for each file
+    # for each file.
+    res = set()
+
     try:
         topdir = check_output(
             ['git', 'rev-parse', '--show-toplevel'], cwd=dirname or None,
@@ -77,9 +67,18 @@ def gitlsfiles(dirname=''):
             ['git', 'ls-files', '-z'], cwd=cwd, stderr=PIPE)
     except (CalledProcessError, OSError):
         # Setuptools mandates we fail silently
-        return set()
+        return res
 
-    return set(decode(quote(posixpath.join(topdir, x))) for x in filenames.split(b('\x00')) if x)
+    for filename in filenames.split(b('\x00')):
+        if filename:
+            filename = posixpath.join(topdir, filename)
+            if sys.platform == 'darwin':
+                filename = hfs_quote(filename)
+            if sys.platform == 'win32':
+                res.add(windecode(filename))
+            else:
+                res.add(compose(fsdecode(filename)))
+    return res
 
 
 def listfiles(dirname=''):
