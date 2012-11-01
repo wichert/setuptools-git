@@ -199,7 +199,7 @@ class listfiles_tests(GitTestCase):
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
                 set(self.listfiles(self.directory)),
-                set(['root.txt', 'subdir/entry.txt']))
+                set(['root.txt', join('subdir', 'entry.txt')]))
 
     def test_at_repo_subdir(self):
         self.create_git_file('root.txt')
