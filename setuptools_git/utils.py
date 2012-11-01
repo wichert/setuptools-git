@@ -3,12 +3,16 @@ import os
 import stat
 import shutil
 import unicodedata
+import posixpath
 
 if sys.version_info >= (3,):
     from urllib.parse import quote as url_quote
     unicode = str
 else:
     from urllib import quote as url_quote
+
+__all__ = ['check_call', 'check_output', 'b', 'fsdecode', 'posix',
+           'rmtree', 'compose', 'decompose', 'hfs_quote']
 
 
 try:
@@ -64,6 +68,13 @@ def fsdecode(path):
     return path
 
 
+# Convert path to POSIX path on Windows
+def posix(path):
+    if sys.platform == 'win32':
+        return path.replace(os.sep, posixpath.sep)
+    return path
+
+
 # Windows cannot delete read-only Git objects
 def rmtree(path):
     if sys.platform == 'win32':
@@ -113,6 +124,3 @@ def hfs_quote(path):
             path = path.encode('ascii')
     return path
 
-
-__all__ = ['check_call', 'check_output', 'b', 'fsdecode',
-           'rmtree', 'compose', 'decompose', 'hfs_quote']
