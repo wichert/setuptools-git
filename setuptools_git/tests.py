@@ -224,7 +224,7 @@ class listfiles_tests(GitTestCase):
 
         self.assertEqual(
                 set(self.listfiles(self.directory)),
-                set([filename]))
+                set([compose(filename)]))
 
     def test_utf8_filename(self):
         if sys.version_info >= (3,):
@@ -248,7 +248,7 @@ class listfiles_tests(GitTestCase):
 
         self.assertEqual(
                 set(self.listfiles(self.directory)),
-                set([fsdecode(filename)]))
+                set([compose(fsdecode(filename))]))
 
     def test_latin1_filename(self):
         if sys.version_info >= (3,):

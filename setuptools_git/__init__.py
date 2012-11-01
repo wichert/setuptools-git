@@ -86,7 +86,7 @@ def listfiles(dirname=''):
     filenames = gitlsfiles(dirname)
     dirnames = set(posixpath.dirname(x) for x in filenames)
 
-    cwd = realpath(dirname or os.curdir)
+    cwd = compose(realpath(dirname or os.curdir))
     prefix_length = len(cwd) + 1
 
     if sys.version_info >= (2, 6):
@@ -98,7 +98,7 @@ def listfiles(dirname=''):
         if dirs:
             dirs[:] = [x for x in dirs if compose(posix(realpath(join(root, x)))) in dirnames]
         for file in files:
-            filename = join(root, file)
+            filename = compose(join(root, file))
             if compose(posix(realpath(filename))) in filenames:
                 yield filename[prefix_length:]
 
