@@ -44,6 +44,6 @@ setup(
         ],
     entry_points="""
         [setuptools.file_finders]
-        git=setuptools_git:gitlsfiles
+        git=setuptools_git:listfiles
         """
 )
