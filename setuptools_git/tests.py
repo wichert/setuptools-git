@@ -25,7 +25,7 @@ class GitTestCase(unittest.TestCase):
 
     def new_repo(self):
         from setuptools_git.utils import check_call
-        directory = realpath(tempfile.mkdtemp())
+        directory = realpath(tempfile.mkdtemp(suffix='ü'))
         os.chdir(directory)
         check_call(['git', 'init', '--quiet', directory])
         return directory
