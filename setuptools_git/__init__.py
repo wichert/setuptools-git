@@ -28,7 +28,7 @@ def windecode(path):
         try:
             path = compose(path.decode('utf-8'))
         except UnicodeDecodeError:
-            path = path.decode(preferredencoding)
+            path = path.decode(preferredencoding, 'surrogateescape')
     else:
         try:
             path = compose(path.decode('utf-8')).encode(preferredencoding)
