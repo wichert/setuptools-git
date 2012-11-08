@@ -5,7 +5,6 @@ A hook into setuptools for Git.
 """
 import sys
 import os
-import locale
 import posixpath
 
 from os.path import realpath, join
@@ -14,8 +13,8 @@ from subprocess import PIPE
 
 from setuptools_git.utils import check_output
 from setuptools_git.utils import b
-from setuptools_git.utils import fsdecode
 from setuptools_git.utils import posix
+from setuptools_git.utils import fsdecode
 from setuptools_git.utils import compose
 from setuptools_git.utils import hfs_quote
 
@@ -23,17 +22,16 @@ from setuptools_git.utils import hfs_quote
 def windecode(path):
     # We receive the raw bytes from Git and must decode by hand
     # (msysgit returns UTF-8 encoded bytes except when it doesn't)
-    preferredencoding = locale.getpreferredencoding()
     if sys.version_info >= (3,):
         try:
             path = compose(path.decode('utf-8'))
         except UnicodeDecodeError:
-            path = path.decode(preferredencoding, 'surrogateescape')
+            path = path.decode(sys.getfilesystemencoding())
     else:
         try:
-            path = compose(path.decode('utf-8')).encode(preferredencoding)
+            path = compose(path.decode('utf-8')).encode(sys.getfilesystemencoding())
         except UnicodeError:
-            pass # Already in preferred encoding (hopefully)
+            pass # Already in filesystem encoding (hopefully)
     return path
 
 

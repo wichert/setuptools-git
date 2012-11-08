@@ -11,7 +11,7 @@ if sys.version_info >= (3,):
 else:
     from urllib import quote as url_quote
 
-__all__ = ['check_call', 'check_output', 'b', 'fsdecode', 'posix',
+__all__ = ['check_call', 'check_output', 'b', 'posix', 'fsdecode',
            'rmtree', 'compose', 'decompose', 'hfs_quote']
 
 
@@ -60,18 +60,21 @@ def b(s, encoding='utf-8'):
     return s
 
 
-# Decode path from fs encoding under Python 3
-def fsdecode(path):
-    if sys.version_info >= (3,):
-        if not isinstance(path, str):
-            return path.decode(sys.getfilesystemencoding(), 'surrogateescape')
-    return path
-
-
 # Convert path to POSIX path on Windows
 def posix(path):
     if sys.platform == 'win32':
         return path.replace(os.sep, posixpath.sep)
+    return path
+
+
+# Decode path from fs encoding under Python 3
+def fsdecode(path):
+    if sys.version_info >= (3,):
+        if not isinstance(path, str):
+            errors = 'surrogateescape'
+            if sys.platform == 'win32':
+                errors = 'strict'
+            return path.decode(sys.getfilesystemencoding(), errors)
     return path
 
 
