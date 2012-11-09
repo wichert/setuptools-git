@@ -8,7 +8,6 @@ from os.path import realpath, join
 from setuptools_git.utils import posix
 from setuptools_git.utils import fsdecode
 from setuptools_git.utils import rmtree
-from setuptools_git.utils import compose
 from setuptools_git.utils import decompose
 from setuptools_git.utils import hfs_quote
 
@@ -27,7 +26,7 @@ class GitTestCase(unittest.TestCase):
         from setuptools_git.utils import check_call
         suffix = ''
         if sys.platform == 'darwin':
-            suffix = 'ü'  # Test with decomposed UTF-8 in dirname
+            suffix = decompose('ü')  # Test with decomposed UTF-8 in dirname
         directory = realpath(tempfile.mkdtemp(suffix=suffix))
         os.chdir(directory)
         check_call(['git', 'init', '--quiet', directory])
@@ -58,7 +57,7 @@ class gitlsfiles_tests(GitTestCase):
         self.create_git_file('root.txt')
         self.assertEqual(
                 set(self.gitlsfiles(self.directory)),
-                set([compose(posix(realpath('root.txt')))]))
+                set([posix(realpath('root.txt'))]))
 
     def test_at_repo_root_with_subdir(self):
         self.create_git_file('root.txt')
@@ -66,8 +65,8 @@ class gitlsfiles_tests(GitTestCase):
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
                 set(self.gitlsfiles(self.directory)),
-                set([compose(posix(realpath('root.txt'))),
-                     compose(posix(realpath('subdir/entry.txt')))]))
+                set([posix(realpath('root.txt')),
+                     posix(realpath('subdir/entry.txt'))]))
 
     def test_at_repo_subdir(self):
         self.create_git_file('root.txt')
@@ -75,8 +74,8 @@ class gitlsfiles_tests(GitTestCase):
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
                 set(self.gitlsfiles(join(self.directory, 'subdir'))),
-                set([compose(posix(realpath('root.txt'))),
-                     compose(posix(realpath('subdir/entry.txt')))]))
+                set([posix(realpath('root.txt')),
+                     posix(realpath('subdir/entry.txt'))]))
 
     def test_nonascii_filename(self):
         filename = 'héhé.html'
@@ -93,7 +92,7 @@ class gitlsfiles_tests(GitTestCase):
 
         self.assertEqual(
                 set(self.gitlsfiles(self.directory)),
-                set([compose(posix(realpath(filename)))]))
+                set([posix(realpath(filename))]))
 
     def test_utf8_filename(self):
         if sys.version_info >= (3,):
@@ -117,7 +116,7 @@ class gitlsfiles_tests(GitTestCase):
 
         self.assertEqual(
                 set(self.gitlsfiles(self.directory)),
-                set([compose(posix(realpath(fsdecode(filename))))]))
+                set([posix(realpath(fsdecode(filename)))]))
 
     def test_latin1_filename(self):
         if sys.version_info >= (3,):
@@ -141,7 +140,7 @@ class gitlsfiles_tests(GitTestCase):
 
         self.assertEqual(
                 set(self.gitlsfiles(self.directory)),
-                set([compose(posix(realpath(fsdecode(filename))))]))
+                set([posix(realpath(fsdecode(filename)))]))
 
     def test_empty_repo(self):
         self.assertEqual(
@@ -156,7 +155,7 @@ class gitlsfiles_tests(GitTestCase):
         self.create_git_file('root.txt')
         self.assertEqual(
                 set(self.gitlsfiles()),
-                set([compose(posix(realpath('root.txt')))]))
+                set([posix(realpath('root.txt'))]))
 
     def test_empty_dirname_in_subdir(self):
         self.create_git_file('root.txt')
@@ -165,8 +164,8 @@ class gitlsfiles_tests(GitTestCase):
         os.chdir(join(self.directory, 'subdir'))
         self.assertEqual(
                 set(self.gitlsfiles()),
-                set([compose(posix(realpath('../root.txt'))),
-                     compose(posix(realpath('../subdir/entry.txt')))]))
+                set([posix(realpath('../root.txt')),
+                     posix(realpath('../subdir/entry.txt'))]))
 
     def test_git_error(self):
         import setuptools_git
@@ -227,7 +226,7 @@ class listfiles_tests(GitTestCase):
 
         self.assertEqual(
                 set(self.listfiles(self.directory)),
-                set([compose(filename)]))
+                set([filename]))
 
     def test_utf8_filename(self):
         if sys.version_info >= (3,):
@@ -251,7 +250,7 @@ class listfiles_tests(GitTestCase):
 
         self.assertEqual(
                 set(self.listfiles(self.directory)),
-                set([compose(fsdecode(filename))]))
+                set([fsdecode(filename)]))
 
     def test_latin1_filename(self):
         if sys.version_info >= (3,):
