@@ -5,8 +5,8 @@ import tempfile
 import unittest
 
 from os.path import realpath, join
-from setuptools_git.utils import fsdecode
 from setuptools_git.utils import posix
+from setuptools_git.utils import fsdecode
 from setuptools_git.utils import rmtree
 from setuptools_git.utils import compose
 from setuptools_git.utils import decompose
@@ -25,7 +25,10 @@ class GitTestCase(unittest.TestCase):
 
     def new_repo(self):
         from setuptools_git.utils import check_call
-        directory = realpath(tempfile.mkdtemp(suffix='ü'))
+        suffix = ''
+        if sys.platform == 'darwin':
+            suffix = 'ü'  # Test with decomposed UTF-8 in dirname
+        directory = realpath(tempfile.mkdtemp(suffix=suffix))
         os.chdir(directory)
         check_call(['git', 'init', '--quiet', directory])
         return directory
