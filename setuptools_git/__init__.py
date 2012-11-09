@@ -16,6 +16,7 @@ from setuptools_git.utils import b
 from setuptools_git.utils import posix
 from setuptools_git.utils import fsdecode
 from setuptools_git.utils import compose
+from setuptools_git.utils import decompose
 from setuptools_git.utils import hfs_quote
 
 
@@ -24,14 +25,14 @@ def windecode(path):
     # (msysgit returns UTF-8 encoded bytes except when it doesn't)
     if sys.version_info >= (3,):
         try:
-            path = compose(path.decode('utf-8'))
+            path = path.decode('utf-8')
         except UnicodeDecodeError:
             path = path.decode(sys.getfilesystemencoding())
     else:
         try:
-            path = compose(path.decode('utf-8')).encode(sys.getfilesystemencoding())
+            path = path.decode('utf-8').encode(sys.getfilesystemencoding())
         except UnicodeError:
-            pass # Already in filesystem encoding (hopefully)
+            pass
     return path
 
 
@@ -73,9 +74,12 @@ def gitlsfiles(dirname=''):
             if sys.platform == 'darwin':
                 filename = hfs_quote(filename)
             if sys.platform == 'win32':
-                res.add(windecode(filename))
+                filename = windecode(filename)
             else:
-                res.add(compose(fsdecode(filename)))
+                filename = fsdecode(filename)
+            if sys.platform == 'darwin':
+                filename = decompose(filename)
+            res.add(filename)
     return res
 
 
@@ -83,7 +87,7 @@ def listfiles(dirname=''):
     filenames = gitlsfiles(dirname)
     dirnames = set(posixpath.dirname(x) for x in filenames)
 
-    cwd = compose(realpath(dirname or os.curdir))
+    cwd = realpath(dirname or os.curdir)
     prefix_length = len(cwd) + 1
 
     if sys.version_info >= (2, 6):
@@ -93,10 +97,10 @@ def listfiles(dirname=''):
 
     for root, dirs, files in walker:
         if dirs:
-            dirs[:] = [x for x in dirs if compose(posix(realpath(join(root, x)))) in dirnames]
+            dirs[:] = [x for x in dirs if posix(realpath(join(root, x))) in dirnames]
         for file in files:
-            filename = compose(join(root, file))
-            if compose(posix(realpath(filename))) in filenames:
+            filename = join(root, file)
+            if posix(realpath(filename)) in filenames:
                 yield filename[prefix_length:]
 
 
@@ -106,5 +110,5 @@ if __name__ == '__main__':
     else:
         dirname = ''
     for filename in listfiles(dirname):
-        print(filename)
+        print(compose(filename))
 
