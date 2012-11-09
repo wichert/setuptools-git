@@ -110,5 +110,8 @@ if __name__ == '__main__':
     else:
         dirname = ''
     for filename in listfiles(dirname):
-        print(compose(filename))
+        try:
+            print(compose(filename))
+        except UnicodeEncodeError:
+            print(repr(filename)[1:-1])
 
