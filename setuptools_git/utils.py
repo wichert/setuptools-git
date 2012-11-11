@@ -71,9 +71,10 @@ def posix(path):
 def fsdecode(path):
     if sys.version_info >= (3,):
         if not isinstance(path, str):
-            errors = 'surrogateescape'
             if sys.platform == 'win32':
                 errors = 'strict'
+            else:
+                errors = 'surrogateescape'
             return path.decode(sys.getfilesystemencoding(), errors)
     return path
 
