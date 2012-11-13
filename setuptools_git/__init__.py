@@ -18,9 +18,8 @@ from setuptools_git.utils import compose
 from setuptools_git.utils import decompose
 
 
-def windecode(path):
+def ntfsdecode(path):
     # We receive the raw bytes from Git and must decode by hand
-    # (msysgit returns UTF-8 encoded bytes except when it doesn't)
     if sys.version_info >= (3,):
         try:
             path = path.decode('utf-8')
@@ -30,7 +29,7 @@ def windecode(path):
         try:
             path = path.decode('utf-8').encode(sys.getfilesystemencoding())
         except UnicodeError:
-            pass
+            pass  # Already in filesystem encoding (hopefully)
     return path
 
 
@@ -56,7 +55,7 @@ def gitlsfiles(dirname=''):
             stderr=PIPE).strip()
 
         if sys.platform == 'win32':
-            cwd = windecode(topdir)
+            cwd = ntfsdecode(topdir)
         else:
             cwd = topdir
 
@@ -72,7 +71,7 @@ def gitlsfiles(dirname=''):
             if sys.platform == 'darwin':
                 filename = hfs_quote(filename)
             if sys.platform == 'win32':
-                filename = windecode(filename)
+                filename = ntfsdecode(filename)
             else:
                 filename = fsdecode(filename)
             if sys.platform == 'darwin':
