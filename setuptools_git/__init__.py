@@ -75,8 +75,8 @@ def gitlsfiles(dirname=''):
                 filename = windecode(filename)
             else:
                 filename = fsdecode(filename)
-                if sys.platform == 'darwin':
-                    filename = decompose(filename)
+            if sys.platform == 'darwin':
+                filename = decompose(filename)
             res.add(filename)
     return res
 
