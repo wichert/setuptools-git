@@ -12,7 +12,7 @@ else:
     from urllib import quote as url_quote
 
 __all__ = ['check_call', 'check_output', 'b', 'posix', 'fsdecode',
-           'rmtree', 'compose', 'decompose', 'hfs_quote']
+           'rmtree', 'hfs_quote', 'compose', 'decompose']
 
 
 try:
@@ -90,6 +90,19 @@ def rmtree(path):
         shutil.rmtree(path, False)
 
 
+# HFS Plus quotes unknown bytes like so: %F6
+def hfs_quote(path):
+    if isinstance(path, unicode):
+        raise TypeError('bytes are required')
+    try:
+        path.decode('utf-8')
+    except UnicodeDecodeError:
+        path = url_quote(path) # Not UTF-8
+        if sys.version_info >= (3,):
+            path = path.encode('ascii')
+    return path
+
+
 # HFS Plus uses decomposed UTF-8
 def compose(path):
     if isinstance(path, unicode):
@@ -113,18 +126,5 @@ def decompose(path):
         path = path.encode('utf-8')
     except UnicodeError:
         pass # Not UTF-8
-    return path
-
-
-# HFS Plus quotes unknown bytes like so: %F6
-def hfs_quote(path):
-    if isinstance(path, unicode):
-        raise TypeError('bytes are required')
-    try:
-        path.decode('utf-8')
-    except UnicodeDecodeError:
-        path = url_quote(path) # Not UTF-8
-        if sys.version_info >= (3,):
-            path = path.encode('ascii')
     return path
 

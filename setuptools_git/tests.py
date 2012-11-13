@@ -8,8 +8,8 @@ from os.path import realpath, join
 from setuptools_git.utils import posix
 from setuptools_git.utils import fsdecode
 from setuptools_git.utils import rmtree
-from setuptools_git.utils import decompose
 from setuptools_git.utils import hfs_quote
+from setuptools_git.utils import decompose
 
 
 class GitTestCase(unittest.TestCase):

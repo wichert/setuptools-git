@@ -13,9 +13,9 @@ from setuptools_git.utils import check_output
 from setuptools_git.utils import b
 from setuptools_git.utils import posix
 from setuptools_git.utils import fsdecode
+from setuptools_git.utils import hfs_quote
 from setuptools_git.utils import compose
 from setuptools_git.utils import decompose
-from setuptools_git.utils import hfs_quote
 
 
 def windecode(path):
