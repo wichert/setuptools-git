@@ -24,10 +24,7 @@ class GitTestCase(unittest.TestCase):
 
     def new_repo(self):
         from setuptools_git.utils import check_call
-        suffix = ''
-        if sys.platform == 'darwin':
-            suffix = decompose('ü')  # Test with decomposed UTF-8 in dirname
-        directory = realpath(tempfile.mkdtemp(suffix=suffix))
+        directory = realpath(tempfile.mkdtemp())
         os.chdir(directory)
         check_call(['git', 'init', '--quiet', directory])
         return directory
