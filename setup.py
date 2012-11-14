@@ -1,17 +1,4 @@
-import sys
-
-try:
-    from setuptools import setup, find_packages
-except ImportError:
-    try:
-        from ez_setup import use_setuptools
-    except ImportError:
-        print("can't find ez_setup")
-        print("try: wget http://peak.telecommunity.com/dist/ez_setup.py")
-        sys.exit(1)
-    use_setuptools()
-    from setuptools import setup, find_packages
-
+from setuptools import setup, find_packages
 
 version = '1.0b1dev'
 
