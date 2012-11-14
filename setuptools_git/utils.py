@@ -18,7 +18,7 @@ __all__ = ['check_call', 'check_output', 'b', 'posix', 'fsdecode',
 try:
     from subprocess import check_call
 except ImportError:
-    # BBB for python <2.5
+    # BBB for Python < 2.5
     def check_call(*popenargs, **kwargs):
         from subprocess import call
         from subprocess import CalledProcessError
@@ -34,11 +34,11 @@ except ImportError:
 try:
     from subprocess import check_output
 except ImportError:
-    # BBB for python <2.7
+    # BBB for Python < 2.7
     def check_output(*popenargs, **kwargs):
-        from subprocess import CalledProcessError
         from subprocess import PIPE
         from subprocess import Popen
+        from subprocess import CalledProcessError
         if 'stdout' in kwargs:
             raise ValueError(
                     'stdout argument not allowed, it will be overridden.')
@@ -53,7 +53,7 @@ except ImportError:
         return output
 
 
-# Fake byte literals for Python <= 2.5
+# Fake byte literals for Python < 2.6
 def b(s, encoding='utf-8'):
     if sys.version_info >= (3,):
         return s.encode(encoding)
