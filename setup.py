@@ -14,6 +14,7 @@ setup(
     license='BSD',
     packages=find_packages(),
     test_suite='setuptools_git',
+    zip_safe=True,
     classifiers=[
         "Topic :: Software Development :: Version Control",
         "Development Status :: 4 - Beta",
