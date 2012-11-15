@@ -26,7 +26,7 @@ class GitTestCase(unittest.TestCase):
         from setuptools_git.utils import check_call
         directory = realpath(tempfile.mkdtemp())
         os.chdir(directory)
-        check_call(['git', 'init', '--quiet', directory])
+        check_call(['git', 'init', '--quiet', os.curdir])
         return directory
 
     def create_file(self, *path):
