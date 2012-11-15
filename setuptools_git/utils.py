@@ -11,8 +11,8 @@ if sys.version_info >= (3,):
 else:
     from urllib import quote as url_quote
 
-__all__ = ['check_call', 'check_output', 'b', 'posix', 'fsdecode',
-           'rmtree', 'hfs_quote', 'compose', 'decompose']
+__all__ = ['check_call', 'check_output', 'rmtree',
+           'b', 'posix', 'fsdecode', 'hfs_quote', 'compose', 'decompose']
 
 
 try:
@@ -53,6 +53,17 @@ except ImportError:
         return output
 
 
+# Windows cannot delete read-only Git objects
+def rmtree(path):
+    if sys.platform == 'win32':
+        def onerror(func, path, excinfo):
+            os.chmod(path, stat.S_IWRITE)
+            func(path)
+        shutil.rmtree(path, False, onerror)
+    else:
+        shutil.rmtree(path, False)
+
+
 # Fake byte literals for Python < 2.6
 def b(s, encoding='utf-8'):
     if sys.version_info >= (3,):
@@ -77,17 +88,6 @@ def fsdecode(path):
                 errors = 'surrogateescape'
             return path.decode(sys.getfilesystemencoding(), errors)
     return path
-
-
-# Windows cannot delete read-only Git objects
-def rmtree(path):
-    if sys.platform == 'win32':
-        def onerror(func, path, excinfo):
-            os.chmod(path, stat.S_IWRITE)
-            func(path)
-        shutil.rmtree(path, False, onerror)
-    else:
-        shutil.rmtree(path, False)
 
 
 # HFS Plus quotes unknown bytes like so: %F6
