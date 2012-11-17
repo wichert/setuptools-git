@@ -1,0 +1,21 @@
+TODO
+----
+
+* Git thinks that filenames are bytestreams, not character sequences.
+  http://article.gmane.org/gmane.comp.version-control.git/122860
+
+* Git can not work across different encodings, and admits as much.
+  Then again Subversion can't either.
+
+* Our only hope is to ask Git for bytestreams and apply some heuristics
+  as to the encoding and composition used.
+
+* ATM, setuptools-git returns files by their OS path, not the POSIX
+  path that is returned by Git. It also resolves symbolic links within
+  the same repository.
+
+* We might get away with passing along the bytestreams in Python 2,
+  but in Python 3 we must return Unicode.
+
+* For passing through non-UTF-8 filenames under Python 3, use the
+  'surrogateescape' error handler.
