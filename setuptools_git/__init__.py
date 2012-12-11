@@ -82,7 +82,6 @@ def gitlsfiles(dirname=''):
 
 def listfiles(dirname=''):
     git_files = gitlsfiles(dirname)
-    git_dirs = set(posixpath.dirname(x) for x in git_files)
 
     cwd = realpath(dirname or os.curdir)
     prefix_length = len(cwd) + 1
@@ -93,8 +92,6 @@ def listfiles(dirname=''):
         walker = os.walk(cwd)
 
     for root, dirs, files in walker:
-        if dirs:
-            dirs[:] = [x for x in dirs if posix(realpath(join(root, x))) in git_dirs]
         for file in files:
             filename = join(root, file)
             if posix(realpath(filename)) in git_files:

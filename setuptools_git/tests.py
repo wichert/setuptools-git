@@ -34,6 +34,9 @@ class GitTestCase(unittest.TestCase):
         fd.write('dummy\n')
         fd.close()
 
+    def create_dir(self, *path):
+        os.makedirs(join(*path))
+
     def create_git_file(self, *path):
         from setuptools_git.utils import check_call
         filename = join(*path)
@@ -153,6 +156,14 @@ class gitlsfiles_tests(GitTestCase):
         self.assertEqual(
                 set(self.gitlsfiles()),
                 set([posix(realpath('root.txt'))]))
+
+    def test_directory_only_contains_another_directory(self):
+        self.create_dir('foo/bar')
+        self.create_git_file('foo/bar/root.txt')
+        self.assertEqual(
+            set(self.gitlsfiles()),
+            set([posix(realpath(join('foo', 'bar', 'root.txt')))])
+            )
 
     def test_empty_dirname_in_subdir(self):
         self.create_git_file('root.txt')
@@ -287,6 +298,14 @@ class listfiles_tests(GitTestCase):
         self.assertEqual(
                 set(self.listfiles()),
                 set(['root.txt']))
+
+    def test_directory_only_contains_another_directory(self):
+        self.create_dir('foo/bar')
+        self.create_git_file('foo/bar/root.txt')
+        self.assertEqual(
+            set(self.listfiles()),
+            set([join('foo', 'bar', 'root.txt')])
+            )
 
     def test_empty_dirname_in_subdir(self):
         self.create_git_file('root.txt')
