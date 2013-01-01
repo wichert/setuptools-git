@@ -80,11 +80,23 @@ def gitlsfiles(dirname=''):
     return res
 
 
-def listfiles(dirname=''):
-    git_files = gitlsfiles(dirname)
+def _gitlsdirs(files, prefix_length):
+    # Return directories managed by Git
+    dirs = set()
+    for file in files:
+        dir = posixpath.dirname(file)
+        while len(dir) > prefix_length:
+            dirs.add(dir)
+            dir = posixpath.dirname(dir)
+    return dirs
 
+
+def listfiles(dirname=''):
     cwd = realpath(dirname or os.curdir)
     prefix_length = len(cwd) + 1
+
+    git_files = gitlsfiles(dirname)
+    git_dirs = _gitlsdirs(git_files, prefix_length)
 
     if sys.version_info >= (2, 6):
         walker = os.walk(cwd, followlinks=True)
@@ -92,6 +104,7 @@ def listfiles(dirname=''):
         walker = os.walk(cwd)
 
     for root, dirs, files in walker:
+        dirs[:] = [x for x in dirs if posix(realpath(join(root, x))) in git_dirs]
         for file in files:
             filename = join(root, file)
             if posix(realpath(filename)) in git_files:
