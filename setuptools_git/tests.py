@@ -168,19 +168,23 @@ class gitlsfiles_tests(GitTestCase):
                      posix(realpath('../subdir/entry.txt'))]))
 
     def test_directory_only_contains_another_directory(self):
+        self.create_git_file('root.txt')
         self.create_dir('foo', 'bar')
-        self.create_git_file('foo', 'bar', 'root.txt')
+        self.create_git_file('foo', 'bar', 'entry.txt')
         self.assertEqual(
             set(self.gitlsfiles()),
-            set([posix(realpath('foo/bar/root.txt'))]))
+            set([posix(realpath('root.txt')),
+                 posix(realpath('foo/bar/entry.txt'))]))
 
     def test_directory_only_contains_another_directory_in_subdir(self):
+        self.create_git_file('root.txt')
         self.create_dir('foo', 'bar', 'baz')
-        self.create_git_file('foo', 'bar', 'baz', 'root.txt')
+        self.create_git_file('foo', 'bar', 'baz', 'entry.txt')
         os.chdir('foo')
         self.assertEqual(
             set(self.gitlsfiles()),
-            set([posix(realpath('../foo/bar/baz/root.txt'))]))
+            set([posix(realpath('../root.txt')),
+                 posix(realpath('../foo/bar/baz/entry.txt'))]))
 
     def test_git_error(self):
         import setuptools_git
@@ -316,21 +320,22 @@ class listfiles_tests(GitTestCase):
                 set(['entry.txt']))
 
     def test_directory_only_contains_another_directory(self):
+        self.create_git_file('root.txt')
         self.create_dir('foo', 'bar')
-        self.create_git_file('foo', 'bar', 'root.txt')
+        self.create_git_file('foo', 'bar', 'entry.txt')
         self.assertEqual(
             set(self.listfiles()),
-            set([join('foo', 'bar', 'root.txt')])
-            )
+            set(['root.txt',
+                 join('foo', 'bar', 'entry.txt')]))
 
     def test_directory_only_contains_another_directory_in_subdir(self):
+        self.create_git_file('root.txt')
         self.create_dir('foo', 'bar', 'baz')
-        self.create_git_file('foo', 'bar', 'baz', 'root.txt')
+        self.create_git_file('foo', 'bar', 'baz', 'entry.txt')
         os.chdir('foo')
         self.assertEqual(
             set(self.listfiles()),
-            set([join('bar', 'baz', 'root.txt')])
-            )
+            set([join('bar', 'baz', 'entry.txt')]))
 
     def test_git_error(self):
         import setuptools_git
