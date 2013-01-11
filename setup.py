@@ -1,10 +1,12 @@
 from setuptools import setup, find_packages
 
-version = '1.0b1dev'
+version = '1.0b1'
 
 setup(
     name="setuptools-git",
     version=version,
+    mainainer='Wichert Akkerman',
+    mainainer_email='wichert@wiggy.net',
     author="Yannick Gingras",
     author_email="ygingras@ygingras.net",
     url="https://github.com/wichert/setuptools-git",
