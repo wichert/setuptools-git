@@ -6,7 +6,6 @@ import os
 import posixpath
 
 from os.path import realpath, join
-from subprocess import CalledProcessError
 from subprocess import PIPE
 
 from setuptools_git.utils import check_output
@@ -16,6 +15,16 @@ from setuptools_git.utils import fsdecode
 from setuptools_git.utils import hfs_quote
 from setuptools_git.utils import compose
 from setuptools_git.utils import decompose
+
+
+# try...except block needed to ensure backwrads compatibility
+# with Python 2.4
+CALLED_PROCESS_ERROR_EXCEPTIONS = (OSError,)
+try:
+    from subprocess import CalledProcessError
+    CALLED_PROCESS_ERROR_EXCEPTIONS += (CalledProcessError,)
+except ImportError:
+    pass
 
 
 def ntfsdecode(path):
@@ -61,7 +70,7 @@ def gitlsfiles(dirname=''):
 
         filenames = check_output(
             ['git', 'ls-files', '-z'], cwd=cwd, stderr=PIPE)
-    except (CalledProcessError, OSError):
+    except CALLED_PROCESS_ERROR_EXCEPTIONS:
         # Setuptools mandates we fail silently
         return res
 
