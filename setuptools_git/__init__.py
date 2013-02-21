@@ -15,16 +15,7 @@ from setuptools_git.utils import fsdecode
 from setuptools_git.utils import hfs_quote
 from setuptools_git.utils import compose
 from setuptools_git.utils import decompose
-
-
-# try...except block needed to ensure backwrads compatibility
-# with Python 2.4
-CALLED_PROCESS_ERROR_EXCEPTIONS = (OSError,)
-try:
-    from subprocess import CalledProcessError
-    CALLED_PROCESS_ERROR_EXCEPTIONS += (CalledProcessError,)
-except ImportError:
-    pass
+from setuptools_git.utils import CalledProcessError
 
 
 def ntfsdecode(path):
@@ -70,7 +61,7 @@ def gitlsfiles(dirname=''):
 
         filenames = check_output(
             ['git', 'ls-files', '-z'], cwd=cwd, stderr=PIPE)
-    except CALLED_PROCESS_ERROR_EXCEPTIONS:
+    except CalledProcessError:
         # Setuptools mandates we fail silently
         return res
 
