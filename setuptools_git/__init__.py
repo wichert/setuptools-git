@@ -61,7 +61,7 @@ def gitlsfiles(dirname=''):
 
         filenames = check_output(
             ['git', 'ls-files', '-z'], cwd=cwd, stderr=PIPE)
-    except CalledProcessError:
+    except (CalledProcessError, OSError):
         # Setuptools mandates we fail silently
         return res
 
