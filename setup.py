@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '1.0b2dev'
+version = '1.0'
 
 setup(
     name="setuptools-git",
