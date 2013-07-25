@@ -177,7 +177,7 @@ class gitlsfiles_tests(GitTestCase):
 
     def test_git_error(self):
         import setuptools_git
-        from subprocess import CalledProcessError
+        from setuptools_git.utils import CalledProcessError
 
         def do_raise(*args, **kw):
             raise CalledProcessError(1, 'git')
@@ -318,7 +318,7 @@ class listfiles_tests(GitTestCase):
 
     def test_git_error(self):
         import setuptools_git
-        from subprocess import CalledProcessError
+        from setuptools_git.utils import CalledProcessError
 
         def do_raise(*args, **kw):
             raise CalledProcessError(1, 'git')
