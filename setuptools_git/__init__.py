@@ -6,7 +6,6 @@ import os
 import posixpath
 
 from os.path import realpath, join
-from subprocess import CalledProcessError
 from subprocess import PIPE
 
 from setuptools_git.utils import check_output
@@ -16,6 +15,7 @@ from setuptools_git.utils import fsdecode
 from setuptools_git.utils import hfs_quote
 from setuptools_git.utils import compose
 from setuptools_git.utils import decompose
+from setuptools_git.utils import CalledProcessError
 
 
 def ntfsdecode(path):
