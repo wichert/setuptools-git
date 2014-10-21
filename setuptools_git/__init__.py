@@ -18,6 +18,19 @@ from setuptools_git.utils import decompose
 from setuptools_git.utils import CalledProcessError
 
 
+def version_calc(dist, attr, value):
+    """
+    Handler for parameter to setup(use_vcs_version=value)
+    bool(value) should be true to invoke this plugin.
+    """
+    if attr == 'use_vcs_version' and value:
+        dist.metadata.version = calculate_version()
+
+
+def calculate_version():
+    return check_output(['git', 'describe', '--tags', '--dirty']).strip()
+
+
 def ntfsdecode(path):
     # We receive the raw bytes from Git and must decode by hand
     if sys.version_info >= (3,):

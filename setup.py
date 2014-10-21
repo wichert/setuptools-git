@@ -35,5 +35,8 @@ setup(
     entry_points="""
         [setuptools.file_finders]
         git=setuptools_git:listfiles
+
+        [distutils.setup_keywords]
+        use_vcs_version=setuptools_git:version_calc
         """
 )
