@@ -151,4 +151,7 @@ References
 * `Setuptools complete manual
   <http://peak.telecommunity.com/DevCenter/setuptools>`_
 
-Thanks to [Zooko O'Whielacronx](https://bitbucket.org/zooko) for many improvements to the documentation.
+Thanks to `Zooko O'Whielacronx`_ for many improvements to the documentation.
+
+
+.. _Zooko O'Whielacronx: https://bitbucket.org/zooko
