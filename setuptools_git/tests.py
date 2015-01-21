@@ -61,7 +61,7 @@ class gitlsfiles_tests(GitTestCase):
 
     def test_at_repo_root_with_subdir(self):
         self.create_git_file('root.txt')
-        os.mkdir(join(self.directory, 'subdir'))
+        self.create_dir('subdir')
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
                 set(self.gitlsfiles(self.directory)),
@@ -70,7 +70,7 @@ class gitlsfiles_tests(GitTestCase):
 
     def test_at_repo_subdir(self):
         self.create_git_file('root.txt')
-        os.mkdir(join(self.directory, 'subdir'))
+        self.create_dir('subdir')
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
                 set(self.gitlsfiles(join(self.directory, 'subdir'))),
@@ -157,23 +157,34 @@ class gitlsfiles_tests(GitTestCase):
                 set(self.gitlsfiles()),
                 set([posix(realpath('root.txt'))]))
 
-    def test_directory_only_contains_another_directory(self):
-        self.create_dir('foo/bar')
-        self.create_git_file('foo/bar/root.txt')
-        self.assertEqual(
-            set(self.gitlsfiles()),
-            set([posix(realpath(join('foo', 'bar', 'root.txt')))])
-            )
-
     def test_empty_dirname_in_subdir(self):
         self.create_git_file('root.txt')
-        os.mkdir(join(self.directory, 'subdir'))
+        self.create_dir('subdir')
         self.create_git_file('subdir', 'entry.txt')
-        os.chdir(join(self.directory, 'subdir'))
+        os.chdir('subdir')
         self.assertEqual(
                 set(self.gitlsfiles()),
                 set([posix(realpath('../root.txt')),
                      posix(realpath('../subdir/entry.txt'))]))
+
+    def test_directory_only_contains_another_directory(self):
+        self.create_git_file('root.txt')
+        self.create_dir('foo', 'bar')
+        self.create_git_file('foo', 'bar', 'entry.txt')
+        self.assertEqual(
+            set(self.gitlsfiles()),
+            set([posix(realpath('root.txt')),
+                 posix(realpath('foo/bar/entry.txt'))]))
+
+    def test_directory_only_contains_another_directory_in_subdir(self):
+        self.create_git_file('root.txt')
+        self.create_dir('foo', 'bar', 'baz')
+        self.create_git_file('foo', 'bar', 'baz', 'entry.txt')
+        os.chdir('foo')
+        self.assertEqual(
+            set(self.gitlsfiles()),
+            set([posix(realpath('../root.txt')),
+                 posix(realpath('../foo/bar/baz/entry.txt'))]))
 
     def test_git_error(self):
         import setuptools_git
@@ -205,7 +216,7 @@ class listfiles_tests(GitTestCase):
 
     def test_at_repo_root_with_subdir(self):
         self.create_git_file('root.txt')
-        os.mkdir(join(self.directory, 'subdir'))
+        self.create_dir('subdir')
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
                 set(self.listfiles(self.directory)),
@@ -213,7 +224,7 @@ class listfiles_tests(GitTestCase):
 
     def test_at_repo_subdir(self):
         self.create_git_file('root.txt')
-        os.mkdir(join(self.directory, 'subdir'))
+        self.create_dir('subdir')
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
                 set(self.listfiles(join(self.directory, 'subdir'))),
@@ -299,22 +310,32 @@ class listfiles_tests(GitTestCase):
                 set(self.listfiles()),
                 set(['root.txt']))
 
-    def test_directory_only_contains_another_directory(self):
-        self.create_dir('foo/bar')
-        self.create_git_file('foo/bar/root.txt')
-        self.assertEqual(
-            set(self.listfiles()),
-            set([join('foo', 'bar', 'root.txt')])
-            )
-
     def test_empty_dirname_in_subdir(self):
         self.create_git_file('root.txt')
-        os.mkdir(join(self.directory, 'subdir'))
+        self.create_dir('subdir')
         self.create_git_file('subdir', 'entry.txt')
-        os.chdir(join(self.directory, 'subdir'))
+        os.chdir('subdir')
         self.assertEqual(
                 set(self.listfiles()),
                 set(['entry.txt']))
+
+    def test_directory_only_contains_another_directory(self):
+        self.create_git_file('root.txt')
+        self.create_dir('foo', 'bar')
+        self.create_git_file('foo', 'bar', 'entry.txt')
+        self.assertEqual(
+            set(self.listfiles()),
+            set(['root.txt',
+                 join('foo', 'bar', 'entry.txt')]))
+
+    def test_directory_only_contains_another_directory_in_subdir(self):
+        self.create_git_file('root.txt')
+        self.create_dir('foo', 'bar', 'baz')
+        self.create_git_file('foo', 'bar', 'baz', 'entry.txt')
+        os.chdir('foo')
+        self.assertEqual(
+            set(self.listfiles()),
+            set([join('bar', 'baz', 'entry.txt')]))
 
     def test_git_error(self):
         import setuptools_git
