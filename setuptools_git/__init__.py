@@ -82,6 +82,8 @@ def gitlsfiles(dirname=''):
 
 def listfiles(dirname=''):
     git_files = gitlsfiles(dirname)
+    if not git_files:
+        return
 
     cwd = realpath(dirname or os.curdir)
     prefix_length = len(cwd) + 1
