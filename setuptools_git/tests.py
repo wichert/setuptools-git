@@ -61,7 +61,7 @@ class gitlsfiles_tests(GitTestCase):
 
     def test_at_repo_root_with_subdir(self):
         self.create_git_file('root.txt')
-        os.mkdir(join(self.directory, 'subdir'))
+        self.create_dir('subdir')
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
                 set(self.gitlsfiles(self.directory)),
@@ -70,7 +70,7 @@ class gitlsfiles_tests(GitTestCase):
 
     def test_at_repo_subdir(self):
         self.create_git_file('root.txt')
-        os.mkdir(join(self.directory, 'subdir'))
+        self.create_dir('subdir')
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
                 set(self.gitlsfiles(join(self.directory, 'subdir'))),
@@ -167,7 +167,7 @@ class gitlsfiles_tests(GitTestCase):
 
     def test_empty_dirname_in_subdir(self):
         self.create_git_file('root.txt')
-        os.mkdir(join(self.directory, 'subdir'))
+        self.create_dir('subdir')
         self.create_git_file('subdir', 'entry.txt')
         os.chdir(join(self.directory, 'subdir'))
         self.assertEqual(
@@ -205,7 +205,7 @@ class listfiles_tests(GitTestCase):
 
     def test_at_repo_root_with_subdir(self):
         self.create_git_file('root.txt')
-        os.mkdir(join(self.directory, 'subdir'))
+        self.create_dir('subdir')
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
                 set(self.listfiles(self.directory)),
@@ -213,7 +213,7 @@ class listfiles_tests(GitTestCase):
 
     def test_at_repo_subdir(self):
         self.create_git_file('root.txt')
-        os.mkdir(join(self.directory, 'subdir'))
+        self.create_dir('subdir')
         self.create_git_file('subdir', 'entry.txt')
         self.assertEqual(
                 set(self.listfiles(join(self.directory, 'subdir'))),
@@ -309,7 +309,7 @@ class listfiles_tests(GitTestCase):
 
     def test_empty_dirname_in_subdir(self):
         self.create_git_file('root.txt')
-        os.mkdir(join(self.directory, 'subdir'))
+        self.create_dir('subdir')
         self.create_git_file('subdir', 'entry.txt')
         os.chdir(join(self.directory, 'subdir'))
         self.assertEqual(
