@@ -142,6 +142,20 @@ argument:
         ...)
 
 
+Changes
+-------
+
+1.2;  2017-02-17
+- Add ability to get version from git tags
+  (https://github.com/msabramo/setuptools-git/pull/9)
+- Return early if a directory isn't managed by git
+  (https://github.com/msabramo/setuptools-git/pull/10)
+- Support universal wheels
+  (https://github.com/msabramo/setuptools-git/pull/11)
+- Optimize directory scanning to skip ignored directories
+  (https://github.com/msabramo/setuptools-git/pull/12)
+
+
 References
 ----------
 
