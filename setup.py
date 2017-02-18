@@ -9,7 +9,7 @@ setup(
     maintainer_email='msabramo@gmail.com',
     author="Yannick Gingras",
     author_email="ygingras@ygingras.net",
-    url="https://github.com/wichert/setuptools-git",
+    url="https://github.com/msabramo/setuptools-git",
     keywords='distutils setuptools git',
     description="Setuptools revision control system plugin for Git",
     long_description=open('README.rst').read(),
