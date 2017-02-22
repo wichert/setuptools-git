@@ -46,6 +46,13 @@ class GitTestCase(unittest.TestCase):
         check_call(['git', 'add', filename])
         check_call(['git', 'commit', '--quiet', '-m', 'add new file'])
 
+    def create_git_symlink(self, source, *path):
+        from setuptools_git.utils import check_call
+        link_name = join(*path)
+        os.symlink(source, link_name)
+        check_call(['git', 'add', link_name])
+        check_call(['git', 'commit', '--quiet', '-m', 'add new symlink'])
+
 
 class gitlsfiles_tests(GitTestCase):
 
@@ -315,6 +322,16 @@ class listfiles_tests(GitTestCase):
         self.assertEqual(
                 set(self.listfiles()),
                 set(['entry.txt']))
+
+    def test_symlink(self):
+        self.create_dir('datadir')
+        self.create_git_file('datadir', 'entry.txt')
+        self.create_dir('subdir')
+        self.create_git_symlink('../datadir', 'subdir', 'datadir')
+        os.chdir(join(self.directory, 'subdir'))
+        self.assertEqual(
+                set(self.listfiles()),
+                set([join('datadir', 'entry.txt')]))
 
     def test_git_error(self):
         import setuptools_git
