@@ -324,6 +324,8 @@ class listfiles_tests(GitTestCase):
                 set(['entry.txt']))
 
     def test_symlink(self):
+        if sys.platform == 'win32':
+            return
         self.create_dir('datadir')
         self.create_git_file('datadir', 'entry.txt')
         self.create_dir('subdir')
