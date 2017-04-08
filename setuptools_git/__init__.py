@@ -46,7 +46,7 @@ def ntfsdecode(path):
     return path
 
 
-def gitlsfiles(dirname=''):
+def _gitlsfiles(dirname=''):
     # NB: Passing the '-z' option to 'git ls-files' below returns the
     # output as a blob of null-terminated filenames without canonical-
     # ization or use of double-quoting.
@@ -60,6 +60,7 @@ def gitlsfiles(dirname=''):
     # '"pyramid/tests/fixtures/static/h\\303\\251h\\303\\251.html"'
     #
     # for each file.
+    topdir = None
     res = set()
 
     try:
@@ -76,7 +77,7 @@ def gitlsfiles(dirname=''):
             ['git', 'ls-files', '-z'], cwd=cwd, stderr=PIPE)
     except (CalledProcessError, OSError):
         # Setuptools mandates we fail silently
-        return res
+        return topdir, res
 
     for filename in filenames.split(b('\x00')):
         if filename:
@@ -90,7 +91,11 @@ def gitlsfiles(dirname=''):
             if sys.platform == 'darwin':
                 filename = decompose(filename)
             res.add(filename)
-    return res
+    return topdir, res
+
+
+def gitlsfiles(dirname=''):
+    return _gitlsfiles(dirname)[1]
 
 
 def _gitlsdirs(files, prefix_length):
@@ -105,14 +110,16 @@ def _gitlsdirs(files, prefix_length):
 
 
 def listfiles(dirname=''):
-    git_files = gitlsfiles(dirname)
+    topdir, git_files = _gitlsfiles(dirname)
     if not git_files:
         return
 
     cwd = realpath(dirname or os.curdir)
     prefix_length = len(cwd) + 1
 
-    git_dirs = _gitlsdirs(git_files, prefix_length)
+    topdir_prefix_length = len(realpath(topdir)) + 1
+
+    git_dirs = _gitlsdirs(git_files, topdir_prefix_length)
 
     if sys.version_info >= (2, 6):
         walker = os.walk(cwd, followlinks=True)
