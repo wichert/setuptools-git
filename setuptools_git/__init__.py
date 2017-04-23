@@ -28,7 +28,7 @@ def version_calc(dist, attr, value):
 
 
 def calculate_version():
-    return check_output(['git', 'describe', '--tags', '--dirty']).strip()
+    return check_output(['git', 'describe', '--tags', '--dirty']).decode().strip()
 
 
 def ntfsdecode(path):
@@ -65,20 +65,21 @@ def gitlsfiles(dirname=''):
     try:
         topdir = check_output(
             ['git', 'rev-parse', '--show-toplevel'], cwd=dirname or None,
-            stderr=PIPE).strip()
+            stderr=PIPE).decode().strip()
 
         if sys.platform == 'win32':
             cwd = ntfsdecode(topdir)
         else:
             cwd = topdir
 
-        filenames = check_output(
+        zfilenames = check_output(
             ['git', 'ls-files', '-z'], cwd=cwd, stderr=PIPE)
     except (CalledProcessError, OSError):
         # Setuptools mandates we fail silently
         return res
 
-    for filename in filenames.split(b('\x00')):
+    for bfilename in zfilenames.split(b('\x00')):
+        filename = bfilename.decode()
         if filename:
             filename = posixpath.join(topdir, filename)
             if sys.platform == 'darwin':
