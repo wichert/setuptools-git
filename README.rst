@@ -1,3 +1,9 @@
+Looking for a new maintainer
+----------------------------
+
+Please let me know if interested!
+
+
 About
 -----
 
