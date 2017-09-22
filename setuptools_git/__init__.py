@@ -73,7 +73,7 @@ def gitlsfiles(dirname=''):
             cwd = topdir
 
         filenames = check_output(
-            ['git', 'ls-files', '-z'], cwd=cwd, stderr=PIPE)
+            ['git', 'ls-files', '-z', '--recurse-submodules'], cwd=cwd, stderr=PIPE)
     except (CalledProcessError, OSError):
         # Setuptools mandates we fail silently
         return res
